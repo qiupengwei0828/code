@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.BdStoreDao">
+	<resultMap id="base" type="com.bd.entity.Store"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.Store">
+		SELECT t.*
+        FROM T_BD_STORE t  
+        where 1=1
+        AND 
+        t.org_no in(SELECT
+        tt.org_no FROM T_SYS_ORG_INFO tt
+        WHERE 1=1
+      and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+      <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.status!= null and param.status != '' ">
+			AND STATUS=#{param.status}
+		</if>
+		<if test="param.certactType!= null and param.certactType != '' ">
+			AND CERTACT_TYPE=#{param.certactType}
+		</if>
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_Name like  '%'||#{param.certactName}||'%'
+		</if>
+		<if test="param.certactType!= null and param.certactType != '' ">
+			AND CERTACT_TYPE = #{param.certactType}
+		</if>
+		<if test="param.certactStore!= null and param.certactStore != '' ">
+			AND CERTACT_STORE = #{param.certactStore}
+		</if>
+		<if test="param.businessScope!= null and param.businessScope != '' ">
+			AND business_scope = #{param.businessScope}
+		</if>
+		<if test="param.storeNum!= null and param.storeNum != '' ">
+			AND store_num &gt;= #{param.storeNum} and store_num &lt;= #{param.storenumber}
+		</if>
+		<if test="param.repType!= null and param.repType != '' ">
+			AND store_num=#{param.repType}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.Store">
+		INSERT INTO
+		T_BD_STORE (
+	      id,
+		  org_no,
+		  org_name,        
+		  rep_type, 
+		  certact_type,       
+		  certact_code,   
+		  certact_name,   
+		  store_num,     
+		  certact_store,  
+		  certact_split,  
+		  business_scope, 
+		  status,         
+		  remark 				
+		)
+		values(
+		S_KEY.NEXTVAL,
+		#{orgNo},
+		#{orgName},
+		#{repType},
+		#{certactType},
+		#{certactCode},
+		#{certactName},
+		#{storeNum},
+		#{certactStore},
+		#{certactSplit},
+		#{businessScope},
+		#{status},
+		#{remark}		
+		)
+	</select>
+	<select id="update" resultMap="base" parameterType="com.bd.entity.Store">
+		update
+		T_BD_STORE
+		set
+		  org_no=#{orgNo},        
+		  rep_type=#{repType},
+		  certact_type=#{certactType},        
+		  certact_code=#{certactCode},  
+		  certact_name=#{certactName},   
+		  store_num=#{storeNum},     
+		  certact_store=#{certactStore},  
+		  certact_split=#{certactSplit},  
+		  business_scope=#{businessScope},
+		  status=#{status},         
+		  remark=#{remark},       
+		  org_name=#{orgName}
+		where
+		id =
+		#{id}
+	</select>
+	 <select id="find" resultMap="base" parameterType="com.bd.entity.Store">
+		SELECT t.*
+        FROM T_BD_STORE t
+        where 1 = 1            
+		<if test="id!= null and id != '' ">
+			AND id=#{id}
+		</if>
+		<if test="orgNo!= null and orgNo != '' ">
+			AND org_no=#{orgNo}
+		</if>
+		<if test="certactCode!= null and certactCode != '' ">
+			AND CERTACT_CODE=#{certactCode}
+		</if> 
+	</select>
+	 <select id="export" resultMap="base" parameterType="com.bd.entity.Store">
+		SELECT t.*
+        FROM T_BD_STORE t  
+        where 1=1
+        AND t.org_no in(SELECT
+        tt.org_no FROM T_SYS_ORG_INFO tt
+         WHERE 1=1
+        and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+         <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.status!= null and param.status != '' ">
+			AND STATUS=#{param.status}
+		</if>
+		<if test="param.certactType!= null and param.certactType != '' ">
+			AND CERTACT_TYPE=#{param.certactType}
+		</if>
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_Name like  '%'||#{param.certactName}||'%'
+		</if>
+		<if test="param.certactType!= null and param.certactType != '' ">
+			AND CERTACT_TYPE = #{param.certactType}
+		</if>
+		<if test="param.certactStore!= null and param.certactStore != '' ">
+			AND CERTACT_STORE = #{param.certactStore}
+		</if>
+		<if test="param.businessScope!= null and param.businessScope != '' ">
+			AND business_scope = #{param.businessScope}
+		</if>
+		<if test="param.storeNum!= null and param.storeNum != '' ">
+			AND store_num &gt;= #{param.storeNum} and store_num &lt;= #{param.storenumber}
+		</if>
+	</select>
+	<select id="delete" resultMap="base" parameterType="com.bd.entity.Store">
+		delete
+        T_BD_STORE t
+        where 1 = 1              
+		<if test="id!= null and id != '' ">
+			AND id=#{id}
+		</if>
+	</select>
+	<select id="findNum" resultMap="base" parameterType="com.bd.entity.Store">
+		SELECT decode(sum(t.store_num),null,0,sum(t.store_num)) store_num
+        FROM T_BD_STORE t
+        where 1 = 1 
+        and org_no=#{param.orgNo}           
+		<!-- AND t.org_no in(SELECT
+    tt.org_no FROM T_SYS_ORG_INFO tt
+    WHERE 1=1
+      and ${org.orgDimField}=#{org.ownDimOrgNo})  -->
+		<if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+	</select>
+	<select id="updateStroreNum" resultMap="base" parameterType="com.bd.entity.Store">
+		update
+		T_BD_STORE
+		set 
+		  store_num=#{storeNum}     	
+		where
+		id =
+		#{id}
+	</select>
+</mapper>

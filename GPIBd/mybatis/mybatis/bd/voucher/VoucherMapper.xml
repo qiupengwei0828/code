@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.VoucherDao">
+	<resultMap id="base" type="com.bd.entity.BdVoucherDetail"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.BdVoucherDetail">
+		SELECT t.*
+        FROM T_BD_VOUCHER_DETAIL t  
+        where 1=1
+        AND t.org_no in(SELECT
+         tt.org_no FROM T_SYS_ORG_INFO tt
+         WHERE 1=1 
+         and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+        <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND org_no=#{param.orgNo}
+		</if> 
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_Name like '%${param.certactName}%'
+		</if>
+		order by t.pur_time desc 
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.BdVoucherDetail">
+		INSERT INTO
+		T_BD_VOUCHER_DETAIL (
+		ID,
+		ORG_NO,
+		ORG_NAME,
+		PLAN_ID,
+		CERTACT_CODE,
+		CERTACT_NAME,
+		PUR_NUM,
+		user_id,
+		plan_number,
+		plan_date,
+		quarter,
+		plan_num		
+		)
+		values(
+		S_KEY.NEXTVAL,
+		#{orgNo},
+		#{orgName},
+		#{planId},
+		#{certactCode},
+		#{certactName},
+		#{purNum},
+		#{userId},
+		#{planNumber},
+		#{planDate},
+		#{quarter},
+		#{planNum}
+		)
+	</select>
+	<select id="find" resultMap="base" parameterType="com.bd.entity.BdVoucherDetail">
+		SELECT t.*
+        FROM T_BD_VOUCHER_DETAIL t  
+        where 1=1
+        <if test="id!= null and id != '' ">
+			AND id=#{id}
+		</if>        
+	</select>
+	<select id="update" resultMap="base" parameterType="com.bd.entity.BdVoucherDetail">
+		update
+		T_BD_VOUCHER_DETAIL
+		set pur_time=to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss'),
+		pur_num=#{purNum}	
+		where
+		id =
+		#{id}
+	</select>
+</mapper>

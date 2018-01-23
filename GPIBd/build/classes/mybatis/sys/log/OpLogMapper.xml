@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.OpLogDao">
+	<!-- com.sys.entity.Role -->
+	<resultMap id="base" type="OpLog"></resultMap>
+	<select id="findByPage" resultMap="base" parameterType="OpLog">
+		SELECT
+		t.id,
+		t.app_code,
+		t.user_id,
+		t.op_ip,
+		<!-- t.servlet_Path, -->
+		<!-- t.op_obj, -->
+		t.op_class,
+		t.op_type,
+		t.op_cnt,
+		to_char(t.op_time,'YYYY-MM-DD
+		HH24:mi:ss') op_time
+		FROM
+		T_SYS_OP_LOG t
+		where 1=1
+		<if test="param.appCode!= null and param.appCode != '' ">
+			AND APP_CODE =#{param.appCode}
+		</if>
+		<if test="param.opClass!= null and param.opClass != '' ">
+			AND OP_CLASS =#{param.opClass}
+		</if>
+		<if test="param.opType!= null and param.opType != '' ">
+			AND OP_TYPE =#{param.opType}
+		</if>
+		<if test="param.userId!= null and param.userId != '' ">
+			AND USER_ID like '%'||#{param.userId}||'%'
+		</if>
+		<if test="param.beginDate!= null and param.beginDate != '' ">
+	     <![CDATA[
+			  AND  op_time  >=to_date(#{param.beginDate},'YYYY-MM-DD HH24:mi:ss')
+	     ]]>
+		</if>
+		<if test="param.endDate!= null and param.endDate != '' ">
+	   <![CDATA[
+			  AND  op_time <=to_date(#{param.endDate},'YYYY-MM-DD HH24:mi:ss')
+	   ]]>
+		</if>
+	</select>
+
+
+	<select id="insert" resultMap="base" parameterType="OpLog">
+		<![CDATA[
+		INSERT INTO
+			T_SYS_OP_LOG (
+		    id,
+		    app_code,
+		    user_id,
+		    op_ip,
+		    op_class,
+		    op_type,
+		    op_cnt,
+		    op_time
+			)
+			values(
+		    gpisys.s_log_key.nextval,
+		    #{appCode},
+		    #{userId},
+		    #{opIp},
+		    #{opClass},
+		    #{opType},
+		    #{opCnt},
+		    sysdate
+			)
+		]]>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="OpLog">
+		<![CDATA[
+
+		]]>
+	</select>
+
+	<!-- 以下为测试用 -->
+	<select id="mapQuery" resultType="java.util.HashMap" parameterType="OpLog">
+		select t.id, t.app_code, t.user_id, t.op_ip, t.op_class, t.op_type,
+		t.op_cnt,
+		to_char(t.op_time, 'YYYY-MM-DD hh24:mi:ss') op_time from T_SYS_OP_LOG t
+	</select>
+</mapper>

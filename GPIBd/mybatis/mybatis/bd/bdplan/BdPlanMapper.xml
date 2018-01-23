@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.BdPlanDao">
+	<resultMap id="base" type="com.bd.entity.BdPlan"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.BdPlan">
+    <if test="org.ownDimOrgNo!='62006424'"> 
+		SELECT t.*
+        FROM T_BD_PLAN t  
+         where 1=1
+          AND t.org_no in(SELECT
+         tt.org_no FROM T_SYS_ORG_INFO tt
+         WHERE 1=1
+         and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+      <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND status=#{param.status}
+		</if>
+		<if test="param.userId!= null and param.userId != '' ">
+			AND user_id=#{param.userId}
+		</if> 	
+		<if test="param.planOrgno!= null and param.planOrgno != '' ">
+			AND plan_orgno=#{param.planOrgno}
+		</if> 
+		<if test="param.planNumber!= null and param.planNumber != '' ">
+			AND plan_number=#{param.planNumber}
+		</if> 
+		<if test="param.planDate!= null and param.planDate != '' ">
+			AND plan_date=#{param.planDate}
+		</if> 
+		order by status
+		<!-- union all 
+		SELECT t.*       
+         FROM T_BD_PLAN t  
+         where 1=1  and t.org_no=#{org.ownDimOrgNo} and ( t.status='04' or t.status='01' ) 
+        <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND status=#{param.status}
+		</if>
+		<if test="param.userId!= null and param.userId != '' ">
+			AND user_id=#{param.userId}
+		</if> 
+		<if test="param.planOrgname!= null and param.planOrgname != '' ">
+			AND plan_orgname like '%'||#{param.planOrgname}||'%'
+		</if> 
+		<if test="param.planOrgno!= null and param.planOrgno != '' ">
+			AND plan_orgno=#{param.planOrgno}
+		</if> 
+		<if test="param.planNumber!= null and param.planNumber != '' ">
+			AND plan_number=#{param.planNumber}
+		</if> -->
+		</if>
+		<if test="org.ownDimOrgNo=='62006424'">  
+       SELECT t.*
+        FROM T_BD_PLAN t  
+         where 1=1  and t.status='02'
+         <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND status=#{param.status}
+		</if> 
+		<if test="param.userId!= null and param.userId != '' ">
+			AND user_id=#{param.userId}
+		</if> 
+		<if test="param.planOrgname!= null and param.planOrgname != '' ">
+			AND plan_orgname like '%'||#{param.planOrgname}||'%'
+		</if> 
+		<if test="param.planOrgno!= null and param.planOrgno != '' ">
+			AND plan_orgno=#{param.planOrgno}
+		</if> 
+		<if test="param.planNumber!= null and param.planNumber != '' ">
+			AND plan_number=#{param.planNumber}
+		</if>
+		order by plan_date
+		</if> 
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		INSERT INTO
+		T_BD_PLAN(
+	      id,    
+		  ORG_NO, 
+		  ORG_NAME,      
+		  USER_ID,
+		  YEAR,   
+		  QUARTER,   
+		  PLAN_DATE,     
+		  REMARK,  
+		  STATUS,
+		  PLAN_ORGNO,
+		  PLAN_ORGNAME,
+		  PLAN_NUMBER    				
+		)
+		values(
+		#{id},
+		#{orgNo},
+		#{orgName},
+		#{userId},
+		#{year},
+		#{quarter},
+		#{planDate},
+		#{remark},
+		#{status},
+		#{planOrgno},
+		#{planOrgname},
+		#{planNumber}		
+		)
+	</select>
+	<select id="selectData" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		SELECT t.*
+        FROM T_BD_PLAN t  
+        where 1=1
+		<if test="id!= null and id != '' ">
+			AND id=#{id}
+		</if> 
+		<if test="planNumber!=null and planNumber!= '' ">
+		    AND plan_number=#{planNumber}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		update
+        T_BD_PLAN 
+        set status=#{status},
+        PLAN_DATE=#{planDate},
+        quarter=#{quarter},
+        remark=#{remark},
+        plan_orgno=#{planOrgno},
+        plan_orgname=#{planOrgname},
+        plan_number=#{planNumber}
+		where id=#{id}
+		
+	</select>
+	<select id="find" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		select * from 
+        T_BD_PLAN  
+        where 1=1
+		<if test="id!= null and id != '' ">
+			AND id=#{id}
+		</if> 
+		<if test="id== null or id == '' ">
+		<if test="orgNo!= null and orgNo != '' ">
+			AND org_no=#{orgNo}
+		</if> 
+		<if test="quarter!= null and quarter != '' ">
+			AND quarter=#{quarter}
+		</if> 
+		<if test="id=='' or id==null">
+		    AND status='01'
+		</if>
+		<if test="planOrgno!='' and planOrgno!=null">
+		    AND PLAN_ORGNO=#{planOrgno}
+		</if>
+		</if>
+	</select>
+	<select id="findQuarter" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		select t.quarter,t.year from gpisys.t_sys_date t where to_char(t.day_date,'yyyymmdd')=#{dd}
+	</select>
+	<select id="delete" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		delete T_BD_PLAN t where t.id=#{id}
+	</select>
+		
+	 <select id="findByPageQuery" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		SELECT t.*
+        FROM T_BD_PLAN t  
+         where 1=1
+          AND t.org_no in(SELECT
+         tt.org_no FROM T_SYS_ORG_INFO tt
+         WHERE 1=1
+         and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+      <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND status=#{param.status}
+		</if>
+		<if test="param.userId!= null and param.userId != '' ">
+			AND user_id=#{param.userId}
+		</if> 	
+		<if test="param.planOrgno!= null and param.planOrgno != '' ">
+			AND plan_orgno=#{param.planOrgno}
+		</if> 
+		<if test="param.planNumber!= null and param.planNumber != '' ">
+			AND plan_number=#{param.planNumber}
+		</if> 
+		<if test="param.planDate!= null and param.planDate != '' ">
+			AND plan_date=#{param.planDate}
+		</if> 
+		order by status	
+	</select>
+	<select id="set" resultMap="base" parameterType="com.bd.entity.BdPlan">
+		update
+        T_BD_PLAN 
+        set status=#{status}      
+		where id=#{id}		
+	</select>
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.DicDao">
+
+	<!-- com.sys.entity.Dic -->
+	<resultMap id="base" type="Dic"></resultMap>
+
+
+	<select id="find" resultMap="base" parameterType="Dic">
+		select
+		d.*,
+		t.type_name
+		from
+		T_SYS_DIC_INFO d
+		left join
+		t_Sys_Dic_Type t
+		on
+		d.type_code
+		= t.type_code
+		where
+		1 = 1
+		and
+		ID = #{id}
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Dic">
+		SELECT
+		D.*,
+		T.TYPE_NAME
+		FROM
+		T_SYS_DIC_INFO D
+		LEFT JOIN
+		T_SYS_DIC_TYPE T
+		ON
+		D.TYPE_CODE = T.TYPE_CODE
+		WHERE
+		1 = 1
+		<if test="typeCode != null and typeCode != '' ">
+			AND D.TYPE_CODE=#{typeCode}
+		</if>
+		ORDER BY D.P_VALUE
+	</select>
+
+	<!-- *********************************************************** -->
+
+	<select id="findByPage" resultMap="base" parameterType="Dic">
+		select
+		d.*, t.type_name
+		from
+		T_SYS_DIC_INFO d
+		left join
+		t_Sys_Dic_Type t
+		on
+		d.type_code = t.type_code
+		where
+		1 = 1
+		<if test="param.typeCode != null and param.typeCode != '' ">
+			and d.TYPE_CODE=#{param.typeCode}
+		</if>
+
+	</select>
+
+	<select id="count" resultType="int" parameterType="Dic">
+		SELECT
+		count(*) FROM T_SYS_DIC_INFO t WHERE 1=1
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Dic">
+		DELETE FROM
+		T_SYS_DIC_INFO
+		where
+		ID=#{id}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="Dic">
+		<![CDATA[
+		update
+			T_SYS_DIC_INFO
+		set
+			TYPE_CODE = #{typeCode},
+			P_NAME = #{pName},
+			P_VALUE = #{pValue},
+			REMARK = #{remark},
+			STATUS = #{status},
+			CRT_USER = #{crtUser},
+			CRT_TIME = #{crtTime}
+		where
+			ID=#{id}
+		]]>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Dic">
+		<![CDATA[
+		INSERT INTO
+			T_SYS_DIC_INFO (
+				ID,
+				TYPE_CODE,
+				P_NAME,
+				P_VALUE,
+				REMARK,
+				STATUS,
+				CRT_USER,
+				CRT_TIME
+			)
+			values(
+				s_key.nextval,
+				#{typeCode},
+				#{pName},
+				#{pValue},
+				#{remark},
+				#{status},
+				#{crtUser},
+				#{crtTime}
+			)
+		]]>
+	</select>
+
+	<select id="findUnionCodeAndNameList" resultMap="base" parameterType="String">
+		select d.id,
+		d.type_code,
+		d.p_value || '|' || d.p_name p_name,
+		d.p_value,
+		d.remark,
+		d.status,
+		d.crt_user,
+		d.crt_time,
+		t.type_name
+		from
+		T_SYS_DIC_INFO d
+		left
+		join t_Sys_Dic_Type t
+		on d.type_code = t.type_code
+		where 1 = 1
+		<if test="typeCode != null and typeCode != '' ">
+			and TYPE_CODE=#{typeCode}
+		</if>
+	</select>
+
+</mapper>

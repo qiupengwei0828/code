@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.BdPlanDetailDao">
+	<resultMap id="base" type="com.bd.entity.BdPlanDetail"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.BdPlanDetail">
+		SELECT t.*
+        FROM T_BD_PLAN_DETAIL t  
+        where 1=1
+       
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_NAME=#{param.certactName}
+		</if>
+		<if test="param.planId!= null and param.planId != '' ">
+			AND PLAN_ID=#{param.planId}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.BdPlanDetail">
+		INSERT INTO
+		T_BD_PLAN_DETAIL (
+	      id,
+		  plan_id,             
+		  certact_code,   
+		  certact_name, 
+		  certact_type,  
+		  store_num,     
+     	  plan_num,
+     	  increases     	  
+		)
+		values(
+		S_KEY.nextval,
+		#{planId},
+		#{certactCode},
+		#{certactName},
+		#{certactType},
+		#{storeNum},
+		#{planNum},
+		#{increases}		
+		)
+	</select>
+	<select id="find" resultMap="base" parameterType="com.bd.entity.BdPlanDetail">
+		SELECT t.*
+        FROM T_BD_PLAN_DETAIL t  
+        where  plan_id=#{planId}
+        <if test="certactCode!='' and certactCode!=null ">
+        and certact_code = #{certactCode}
+        </if>
+	</select>
+	<select id="delete" resultMap="base" parameterType="com.bd.entity.BdPlanDetail">
+		delete 
+         T_BD_PLAN_DETAIL t  
+        where  t.plan_id=#{planId}
+	</select>
+	<select id="update" resultMap="base" parameterType="com.bd.entity.BdPlanDetail">
+		update
+		T_BD_PLAN_DETAIL
+		set
+		plan_num = #{planNum},
+     	increases =#{increases}
+		where
+		plan_id=#{planId}
+		and CERTACT_CODE =
+		#{certactCode}
+	</select>
+</mapper>

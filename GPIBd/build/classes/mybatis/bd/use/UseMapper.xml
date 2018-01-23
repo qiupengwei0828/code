@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.UseDao">
+	<resultMap id="base" type="com.bd.entity.BdUseDetail"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.BdUseDetail">
+		SELECT t.*
+        FROM T_BD_USE_DETAIL t  
+        where 1=1
+         AND t.org_no in(SELECT
+         tt.org_no FROM T_SYS_ORG_INFO tt
+         WHERE 1=1
+         and ${org.orgDimField}=#{org.ownDimOrgNo}) 
+      <if test="param.orgNo!= null and param.orgNo != '' ">
+			AND ORG_NO=#{param.orgNo}
+		</if>
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.useType!= null and param.useType != '' ">
+			and use_type=#{param.useType}
+		</if>
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_Name like '%${param.certactName}%'
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.BdUseDetail">
+		INSERT INTO
+		T_BD_USE_DETAIL (
+		ID,
+		ORG_NO,
+		ORG_NAME,
+		CERTACT_CODE,
+		CERTACT_NAME,
+		USE_TYPE,
+		USE_NUM,
+		USE_DATE,
+		user_id
+		
+		)
+		values(
+		S_KEY.nextval,
+		#{orgNo},
+		#{orgName},
+		#{certactCode},
+		#{certactName},
+		#{useType},
+		#{useNum},
+		#{useDate},
+		#{userId}
+		)
+	</select>
+	<select id="find" resultMap="base" parameterType="com.bd.entity.BdUseDetail">
+	select decode(sum(tt.use_num),null,0,sum(tt.use_num)) use_num from T_BD_USE_DETAIL tt 
+        where tt.use_date &gt;= to_char((select min(t.day_date) 
+        from gpisys.t_sys_date t where t.quarter=
+        (select t.quarter from gpisys.t_sys_date t where 
+        to_char(t.day_date,'yyyymmdd')=#{useDate})and t.year=SUBSTR(#{useDate},1,4)),'yyyymmdd')
+         and  tt.use_date &lt;= #{useDate}
+         and tt.org_no=#{orgNo}    and tt.certact_code=#{certactCode}     
+	</select>
+</mapper>

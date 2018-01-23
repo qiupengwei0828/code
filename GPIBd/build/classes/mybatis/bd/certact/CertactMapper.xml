@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bd.dao.CertactDao">
+	<resultMap id="base" type="com.bd.entity.Certact"></resultMap>
+    <select id="findByPage" resultMap="base" parameterType="com.bd.entity.Certact">
+		SELECT t.*
+        FROM T_BD_CERTACT t  
+        where 1=1
+        <if test="param.certactCode!= null and param.certactCode != '' ">
+			AND CERTACT_CODE=#{param.certactCode}
+		</if> 
+		<if test="param.certactName!= null and param.certactName != '' ">
+			AND CERTACT_Name like '%${param.certactName}%'
+		</if>
+		<if test="param.certactType!= null and param.certactType != '' ">
+			AND CERTACT_TYPE=#{param.certactType}
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND STATUS=#{param.status}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.bd.entity.Certact">
+		INSERT INTO
+		T_BD_CERTACT (
+		CERTACT_CODE,
+		CERTACT_NAME,
+		CERTACT_TYPE,
+		STATUS,
+		ENTRY_DAYS
+		
+		)
+		values(
+		#{certactCode},
+		#{certactName},
+		#{certactType},
+		#{status},
+		#{entryDays}
+		)
+	</select>
+	<select id="update" resultMap="base" parameterType="com.bd.entity.Certact">
+		update
+		T_BD_CERTACT
+		set
+		CERTACT_NAME=#{certactName},
+		CERTACT_TYPE=#{certactType},
+		STATUS=#{status},
+		ENTRY_DAYS=#{entryDays}
+		where
+		CERTACT_CODE =
+		#{certactCode}
+	</select>
+	 <select id="find" resultMap="base" parameterType="com.bd.entity.Certact">
+		SELECT t.*
+        FROM T_BD_CERTACT t
+        where 1 = 1              
+		<if test="certactCode!= null and certactCode != '' ">
+			AND CERTACT_CODE=#{certactCode}
+		</if>
+	</select>
+	<select id="delete" resultMap="base" parameterType="com.bd.entity.Certact">
+		DELETE FROM
+		T_BD_CERTACT
+		WHERE
+		CERTACT_CODE = #{certactCode}
+	</select>
+	<select id="exists" resultMap="base" parameterType="com.bd.entity.Certact">
+		select * from T_BD_CERTACT t  
+		where  CERTACT_CODE=#{certactCode}
+	</select>
+	
+	<select id="findCertactType" resultMap="base" parameterType="com.bd.entity.Certact">
+		select * from T_BD_CERTACT t where  1=1
+		<if test="certactType!= null and certactType != '' ">
+		    and t.certact_type=#{certactType}
+		</if>
+		
+	</select>
+</mapper>
