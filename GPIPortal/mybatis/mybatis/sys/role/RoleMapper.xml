@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.RoleDao">
+
+	<!-- com.sys.entity.Role -->
+	<resultMap id="base" type="Role"></resultMap>
+
+	<select id="findAllList" resultMap="base" parameterType="Role">
+		SELECT
+		t.*,a.app_name
+		FROM
+		T_SYS_ROLE t left join T_SYS_APP_INFO a
+		on
+		t.app_code=a.app_code
+		where 1=1
+		<if test="appCode != null and appCode!='' ">
+			and t.app_code =#{appCode}
+			AND ROLE_CODE NOT LIKE '%common'
+		</if>
+	</select>
+
+	<select id="findRoleList" resultMap="base" parameterType="Role">
+		SELECT
+		t.*,a.app_name
+		FROM
+		T_SYS_ROLE t left join T_SYS_APP_INFO a
+		on
+		t.app_code=a.app_code
+		where 1=1
+		<if test="appCode != null and appCode!='' ">
+			and t.app_code =#{appCode}
+		</if>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Role">
+		SELECT
+		t.*
+		FROM
+		T_SYS_ROLE t
+		where 1=1
+		<if test="roleCode != null and roleCode!='' ">
+			and t.role_code =#{roleCode}
+		</if>
+	</select>
+
+	<select id="existsRoleCode" resultMap="base" parameterType="Role">
+		SELECT
+		t.*
+		FROM
+		T_SYS_ROLE t
+		WHERE
+		ROLE_CODE = #{roleCode}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Role">
+		INSERT INTO
+		T_SYS_ROLE (
+		ROLE_CODE,
+		APP_CODE,
+		ROLE_NAME,
+		REMARK,
+		STATUS
+		)
+		values(
+		#{roleCode},
+		#{appCode},
+		#{roleName},
+		#{remark},
+		#{status}
+		)
+
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Role">
+		DELETE FROM
+		T_SYS_ROLE
+		where
+		Role_CODE = #{roleCode}
+	</select>
+	<select id="update" resultMap="base" parameterType="Role">
+		update
+		T_SYS_ROLE
+		set
+		APP_CODE = #{appCode},
+		Role_NAME = #{roleName},
+		REMARK =
+		#{remark},
+		STATUS = #{status}
+		where
+		ROLE_CODE = #{roleCode}
+	</select>
+
+</mapper>

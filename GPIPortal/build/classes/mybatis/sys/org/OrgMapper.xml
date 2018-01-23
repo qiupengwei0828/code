@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.OrgDao">
+
+	<!-- com.sys.entity.Org -->
+	<resultMap id="base" type="Org"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="Org">
+		select t.* from T_SYS_ORG_INFO t WHERE 1=1
+		<if test="orgNo != null and orgNo !='' ">
+			AND t.ORG_NO = #{orgNo}
+		</if>
+	</select>
+
+	<select id="get" resultMap="base" parameterType="Org">
+		select t.* from T_SYS_ORG_INFO t WHERE 1=1
+		<if test="orgNo != null and orgNo !='' ">
+			AND t.ORG_NO = #{orgNo}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Org">
+		SELECT
+		t.* FROM T_SYS_ORG_INFO t
+		ORDER BY DISP_NO
+		#{orgNo}=#{orgNo}
+	</select>
+
+	<select id="findAllTree" resultMap="base" parameterType="Org">
+		SELECT
+		O.ORG_NO,
+		O.P_ORG_NO,
+		O.ORG_NAME,
+		O.DISP_NO,
+		DLEVEL.P_NAME AS ORG_LEVEL,
+		DSTATUS.P_NAME AS STATUS,
+		DORGTYPE.P_NAME AS ORG_TYPE
+		FROM
+		T_SYS_ORG_INFO O
+		LEFT JOIN T_SYS_DIC_INFO DLEVEL
+		ON DLEVEL.P_VALUE =
+		O.ORG_LEVEL
+		AND DLEVEL.TYPE_CODE = 'DIC_ORG_LEVEL'
+		LEFT JOIN
+		T_SYS_DIC_INFO DSTATUS
+		ON DSTATUS.P_VALUE = O.STATUS
+		AND
+		DSTATUS.TYPE_CODE = 'DIC_COMM_STATUS'
+		LEFT JOIN T_SYS_DIC_INFO DORGTYPE
+		ON DORGTYPE.P_VALUE = O.ORG_TYPE
+		AND DORGTYPE.TYPE_CODE =
+		'DIC_ORG_CLASS'
+		ORDER BY O.DISP_NO
+		where 1=1
+	    <if test = "orgDimField != null and orgDimField != '' ">
+		   and #{orgDimField}=#{ownDimOrgNo}
+		</if> 
+	</select>
+
+	<!-- 添加机构 -->
+	<select id="insert" resultMap="base" parameterType="Org">
+		insert into
+		T_SYS_ORG_INFO(
+		ORG_NO,
+		P_ORG_NO,
+		ORG_NAME,
+		ORG_LEVEL,
+		STATUS,
+		CRT_TIME,
+		CRT_USER,
+		ORG_TYPE,
+		DISP_NO
+		)
+		values(
+		#{orgNo},
+		#{pOrgNo},
+		#{orgName},
+		#{orgLevel},
+		#{status},
+		#{crtTime},
+		#{crtUser},
+		#{orgType},
+		#{dispNo}
+		)
+	</select>
+
+	<!-- 修改机构 -->
+	<select id="update" resultMap="base" parameterType="Org">
+		update
+		T_SYS_ORG_INFO
+		set
+		P_ORG_NO=#{pOrgNo},
+		ORG_NAME=#{orgName},
+		ORG_LEVEL=#{orgLevel},
+		STATUS=#{status},
+		CRT_TIME=#{crtTime},
+		CRT_USER=#{crtUser},
+		ORG_TYPE=#{orgType},
+		DISP_NO=#{dispNo}
+		where
+		ORG_NO=#{orgNo}
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Org">
+		delete
+		T_SYS_ORG_INFO
+		where
+		ORG_NO=#{orgNo}
+	</select>
+
+</mapper>

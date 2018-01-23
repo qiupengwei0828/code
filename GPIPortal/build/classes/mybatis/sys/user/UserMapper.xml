@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.UserDao">
+	<resultMap id="base" type="User"></resultMap>
+
+	<!-- 这方法能获取密码和盐 -->
+	<select id="findFormatByLoginName" resultMap="base"
+		parameterType="String">
+		SELECT a.* FROM T_SYS_USER_INFO a WHERE 1=1
+		AND
+		a.user_Id=#{userId}
+
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="User">
+		SELECT
+		t.*
+		FROM
+		T_SYS_USER_INFO t
+		where
+		1 = 1
+		<if test="userId != null and userId != '' ">
+			and USER_ID=#{userId}
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			and ORG_NO=#{orgNo}
+		</if>
+	</select>
+	<!-- 如果有分页， -->
+	<select id="find" resultMap="base" parameterType="User">
+		SELECT t.*,o.org_name
+		FROM T_SYS_USER_INFO t
+		left join
+		t_sys_org_info o
+		on
+		t.org_no=o.org_no
+		where 1 = 1
+		<if test="userName!= null and userName != '' ">
+			AND t.user_name like '%'||#{userName}||'%'
+		</if>
+		<if test="tel!= null and tel != '' ">
+			AND t.tel= #{tel}
+		</if>
+		<if test="status!= null and status != '' ">
+			AND t.status=#{status}
+		</if>
+		<if test="userId!= null and userId != '' ">
+			AND user_id=#{userId}
+		</if>
+	</select>
+	<select id="existsUserId" resultMap="base" parameterType="User">
+		SELECT
+		t.*
+		FROM
+		T_SYS_USER_INFO t
+		WHERE
+		USER_ID = #{userId}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="User">
+		INSERT INTO
+		T_SYS_USER_INFO (
+		USER_ID,
+		USER_NAME,
+		PWD,
+		HR_NO,
+		ORG_NO,
+		DEP_CODE,
+		SEX,
+		CERT_TYP,
+		CERT_NO,
+		NATIVE_PLACE,
+		NATION,
+		USER_CLASS,
+		BIRTHDAY,
+		BEGIN_WORK_DATE,
+		POLITICAL_STATUS,
+		ST_LEVEL,
+		POST,
+		RANK,
+		POS_TITLE,
+		POS,
+		POS_DATE,
+		TEL,
+		MOBILE,
+		EMAIL,
+		MOBILE2,
+		STATUS,
+		CRT_USER,
+		CRT_TIME,
+		SALT
+		)
+		values(
+		#{userId},
+		#{userName},
+		#{pwd},
+		#{hrNo},
+		#{orgNo},
+		#{depCode},
+		#{sex},
+		#{certTyp},
+		#{certNo},
+		#{nativePlace},
+		#{nation},
+		#{userClass},
+		#{birthday},
+		#{beginWorkDate},
+		#{politicalStatus},
+		#{stLevel},
+		#{post},
+		#{rank},
+		#{posTitle},
+		#{pos},
+		#{posDate},
+		#{tel},
+		#{mobile},
+		#{email},
+		#{mobile2},
+		#{status},
+		#{crtUser},
+		#{crtTime},
+		#{salt}
+		)
+	</select>
+	<select id="delete" resultMap="base" parameterType="User">
+		DELETE FROM
+		T_SYS_USER_INFO
+		WHERE
+		USER_ID = #{userId}
+	</select>
+	<select id="update" resultMap="base" parameterType="User">
+		update
+		T_SYS_USER_INFO
+		set
+		USER_NAME=#{userName},
+		HR_NO=#{hrNo},
+		ORG_NO=#{orgNo},
+		DEP_CODE=#{depCode},
+		SEX=#{sex},
+		CERT_TYP=#{certTyp},
+		CERT_NO=#{certNo},
+		NATIVE_PLACE=#{nativePlace},
+		NATION=#{nation},
+		USER_CLASS=#{userClass},
+		BIRTHDAY=#{birthday},
+		BEGIN_WORK_DATE=#{beginWorkDate},
+		POLITICAL_STATUS=#{politicalStatus},
+		ST_LEVEL=#{stLevel},
+		POST=#{post},
+		RANK=#{rank},
+		POS_TITLE=#{posTitle},
+		POS=#{pos},
+		POS_DATE=#{posDate},
+		TEL=#{tel},
+		MOBILE=#{mobile},
+		EMAIL=#{email},
+		MOBILE2=#{mobile2},
+		STATUS=#{status},
+		CRT_USER=#{crtUser},
+		CRT_TIME=#{crtTime}
+		where
+		USER_ID =
+		#{userId}
+	</select>
+
+	<!-- *************************************************** -->
+
+	<select id="findByPage" resultMap="base" parameterType="User">
+		SELECT t.*,o.org_name
+		FROM T_SYS_USER_INFO t
+		left join
+		t_sys_org_info o
+		on
+		t.org_no=o.org_no
+		where 1 = 1
+		and t.org_no in (select o.org_no
+		from
+		t_sys_org_info o
+		connect by prior o.org_no = o.p_org_no
+		start with
+		o.org_no =#{param.orgNo})
+		<if test="param.userName!= null and param.userName != '' ">
+			AND t.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.mobile!= null and param.mobile != '' ">
+			AND t.MOBILE like '%'||#{param.mobile}||'%'
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND t.status=#{param.status}
+		</if>
+		<if test="param.userId!= null and param.userId != '' ">
+			AND user_id=#{param.userId}
+		</if>
+	</select>
+
+	<select id="findUserRolePage" resultMap="base" parameterType="User">
+		select A.role_code,
+		B.USER_ID,
+		B.USER_NAME,
+		B.SEX,
+		B.ORG_NO, --所属机构
+		B.DEP_CODE, --业务部门
+		B.HR_NO,
+		C.ORG_NAME
+		from T_SYS_USER_ROLE A
+		left join
+		T_SYS_USER_INFO B
+		ON
+		A.user_id = B.user_id
+		LEFT JOIN T_SYS_ORG_INFO C
+		ON
+		C.ORG_NO = B.ORG_NO
+		where 1 = 1
+		and role_code=#{param.roleCode}
+	</select>
+
+	<select id="resetPWD" resultMap="base" parameterType="User">
+		update
+		T_SYS_USER_INFO
+		set
+		PWD=#{pwd},SALT=#{salt} where USER_ID =
+		#{userId}
+	</select>
+
+
+	<select id="countUserRole" resultType="int" parameterType="java.util.Map">
+		select count(1) rolecnt
+		from T_SYS_ROLE r, t_sys_user_role t
+		where
+		t.role_code = r.role_code
+		and t.user_id = #{userId}
+		and r.app_code =
+		#{appCode}
+	</select>
+
+	<select id="findUserInfo" resultMap="base" parameterType="User">
+		select
+		u.*, o.org_name
+		from t_sys_user_info u
+		left join t_sys_org_info o
+		on
+		o.org_no = u.org_no
+		where 1 = 1
+		and u.user_id = #{userId}
+	</select>
+</mapper>

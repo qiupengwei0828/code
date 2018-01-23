@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.QueDao">
+
+	<resultMap id="base" type="Que"></resultMap>
+
+	<select id="getKey" resultType="Long" parameterType="Que">
+		SELECT
+		S_KEY.NEXTVAL FROM DUAL
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="Que">
+		SELECT
+		Q.ID,
+		Q.TITLE,
+		Q.CONTENT,
+		Q.SYS_ID,
+		Q.STATUS,
+		A.APP_NAME AS
+		SYS_Name
+		FROM T_SYS_QUE_CON Q
+		LEFT JOIN T_SYS_APP_INFO A
+		ON A.APP_CODE =
+		Q.SYS_ID
+		WHERE 1=1
+		<if test="param.status != null and param.status != '' ">
+			and STATUS = #{param.status}
+		</if>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Que">
+		SELECT
+		Q.ID,
+		Q.TITLE,
+		Q.CONTENT,
+		Q.SYS_ID,
+		Q.STATUS,
+		A.APP_NAME AS
+		SYS_Name
+		FROM T_SYS_QUE_CON Q
+		LEFT JOIN T_SYS_APP_INFO A
+		ON A.APP_CODE =
+		Q.SYS_ID
+		WHERE 1=1
+		<if test="status != null and status != '' ">
+			AND ID = #{id}
+		</if>
+		<if test="status != null and status != '' ">
+			and STATUS = #{status}
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Que">
+		INSERT INTO
+		T_SYS_QUE_CON(
+		ID,
+		TITLE,
+		CONTENT,
+		SYS_ID,
+		STATUS
+		)
+		VALUES(
+		#{id},
+		#{title},
+		#{content},
+		#{sysId},
+		#{status}
+		)
+	</select>
+
+	<select id="updateStatus" resultMap="base" parameterType="Que">
+		UPDATE
+		T_SYS_QUE_CON
+		SET
+		STATUS = #{status}
+		WHERE 1=1
+		AND
+		ID=#{id}
+	</select>
+
+</mapper>
