@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cert.dao.HoldInfoDao">
+	<!-- com.cert.dao.HoldInfoDao -->
+	<resultMap id="base" type="HoldInfo"></resultMap>
+
+	<select id="findAllList" resultMap="base" parameterType="HoldInfo">
+		SELECT
+		t.*,
+		a.cert_name,
+		a.adm_class,a.Industry,a.useful_life
+		FROM
+		T_CERT_USER_HOLD_INFO t
+		left join T_CERT_INFO a
+		on t.cert_code = a.cert_code
+		where 1=1
+		<if test="userId != null and userId != '' ">
+			and t.user_id=#{userId}
+		</if>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="HoldInfo">
+		SELECT
+		t.*,f.file_save_name,f.file_id
+		FROM
+		T_CERT_USER_HOLD_INFO t
+		left
+		join
+		T_CERT_ATT_INFO f
+		on
+		t.id=f.tab_id
+		where 1=1
+		<if test="id != null and id != '' ">
+			AND t.ID = #{id}
+		</if>
+		<if test="certCode != null and certCode != '' ">
+			AND t.cert_code = #{certCode}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="HoldInfo">
+		INSERT INTO
+		T_CERT_USER_HOLD_INFO (
+		ID,
+		USER_ID,
+		USER_CERT,
+		CERT_CODE,
+		CERT_NO,
+		ISSUE_DATE,
+		ISSUE_ORG,
+		CERT_LEVEL,
+		CERT_SCORE,
+		STATUS,
+		REMARK
+		)
+		values(
+		#{id},
+		#{userId},
+		#{userCert},
+		#{certCode},
+		#{certNo},
+		#{issueDate},
+		#{issueOrg},
+		#{certLevel},
+		#{certScore},
+		#{status},
+		#{remark}
+		)
+	</select>
+	<select id="update" resultMap="base" parameterType="HoldInfo">
+		update
+		T_CERT_USER_HOLD_INFO
+		set
+		CERT_CODE=#{certCode},
+		CERT_NO=#{certNo},
+		ISSUE_DATE=#{issueDate},
+		ISSUE_ORG=#{issueOrg},
+		CERT_LEVEL=#{certLevel},
+		CERT_SCORE=#{certScore},
+		STATUS=#{status},
+		REMARK=#{remark}
+		where
+		ID=
+		#{id}
+	</select>
+	<select id="delete" resultMap="base" parameterType="HoldInfo">
+		DELETE FROM
+		T_CERT_USER_HOLD_INFO where
+		ID=#{id}
+	</select>
+	<select id="getKey" resultType="Long" parameterType="HoldInfo">
+		SELECT
+		s_key.nextval from dual
+	</select>
+	<select id="existsCertCode" resultMap="base" parameterType="HoldInfo">
+		SELECT
+		t.*
+		FROM
+		T_CERT_USER_HOLD_INFOt
+		WHERE
+		ID= #{id}
+	</select>
+
+	<select id="findStaffCert" resultMap="base" parameterType="HoldInfo">
+		SELECT ROWNUM,
+		H.ID,
+		H.USER_ID,
+		H.USER_CERT,
+		H.CERT_CODE,
+		H.ISSUE_DATE,
+		H.ISSUE_ORG,
+		H.CERT_LEVEL,
+		H.CERT_SCORE,
+		H.STATUS,
+		H.REMARK,
+		U.USER_NAME,
+		U.TEL,
+		U.CERT_NO,
+		O.ORG_NO,
+		O.ORG_NAME,
+		U.POS,
+		U.USER_CLASS,
+		C.CERT_NAME,
+		C.INDUSTRY,
+		C.ADM_CLASS
+		FROM T_CERT_USER_HOLD_INFO H,
+		T_SYS_USER_INFO U,
+		T_CERT_INFO C,
+		T_SYS_ORG_INFO O
+		WHERE 1 = 1
+		AND H.USER_ID = U.USER_ID
+		AND
+		H.CERT_CODE = C.CERT_CODE
+		AND U.ORG_NO = O.ORG_NO
+		<if test="param.pos!= null and param.pos != '' ">
+			AND u.pos = #{param.pos}
+		</if>
+		<if test="param.userClass!= null and param.userClass != '' ">
+			AND u.user_Class = #{param.userClass}
+		</if>
+		<if test="param.userName!= null and param.userName != '' ">
+			AND u.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.admClass!= null and param.admClass != '' ">
+			AND c.adm_class = #{param.admClass}
+		</if>
+		<if test="param.certCode != null and param.certCode != '' ">
+			AND c.cert_code= #{param.certCode}
+		</if>
+		<if test="param.certNo != null and param.certNo != '' ">
+			AND H.cert_no = #{param.certNo}
+		</if>
+		<if test="param.issueDate != null and param.issueDate != '' ">
+			AND H.issue_date = #{param.issueDate}
+		</if>
+		<if test="param.status != null and param.status != '' ">
+			AND H.status = #{param.status}
+		</if>
+		AND O.ORG_NO IN (SELECT TT.ORG_NO
+		FROM T_SYS_ORG_INFO TT
+		START WITH
+		TT.ORG_NO = #{param.orgNo}
+		CONNECT BY PRIOR TT.ORG_NO = TT.P_ORG_NO)
+		order by O.ORG_NO
+	</select>
+
+	<select id="check" resultMap="base" parameterType="HoldInfo">
+		select A.ID
+		HOLD_ID,
+		A.USER_ID,
+		A.CERT_CODE,
+		A.CERT_NO,
+		A.ISSUE_DATE,
+		A.ISSUE_ORG,
+		A.STATUS,
+		A.REMARK,
+		B.USER_NAME,
+		B.POS,
+		C.CERT_NAME,
+		C.CERT_UNIT,
+		O.ORG_NO,
+		O.P_ORG_NO
+		from T_CERT_USER_HOLD_INFO A
+		LEFT JOIN
+		T_SYS_USER_INFO B
+		ON B.USER_ID = A.USER_ID
+		LEFT JOIN t_cert_info C
+		ON
+		C.CERT_CODE = A.CERT_CODE
+		LEFT JOIN
+		T_SYS_ORG_INFO O
+		ON O.ORG_NO =
+		B.ORG_NO
+		WHERE 1 = 1
+		AND A.STATUS = '2'
+		<!-- AND O.ORG_NO = #{param.orgNo} -->
+		<if test="param.orgDimField != null and param.orgDimField !='' ">
+			<!-- #:加引号；$:不加引号 -->
+			and ${param.orgDimField}=#{param.ownDimOrgNo}
+		</if>
+		<if test="param.orgLevel != null and param.orgLevel !='' ">
+			and O.ORG_LEVEL=#{param.orgLevel}
+		</if>
+		order by B.USER_NAME
+	</select>
+
+	<select id="checkinfo" resultMap="base" parameterType="HoldInfo">
+		select
+		B.ID,
+		B.USER_ID,--用户ID
+		B.USER_CERT,--身份证
+		B.CERT_CODE,--证件CODE
+		B.CERT_NO,--证件编号
+		B.ISSUE_DATE,--颁发时间
+		B.ISSUE_ORG,--颁发机构
+		B.CERT_LEVEL,--证书等级
+		B.CERT_SCORE,--评定成绩
+		B.STATUS,--审核成绩
+		C.FILE_SAVE_NAME,--文件存储名
+		C.TAB_ID,
+		A.CERT_NAME,--证书名称
+		A.INDUSTRY,--行业分类
+		A.ADM_CLASS--资格分类
+		from t_cert_user_hold_info B
+		left join t_cert_att_info
+		C
+		ON C.TAB_ID = B.ID
+		LEFT
+		JOIN t_cert_info A
+		ON A.CERT_CODE =
+		B.CERT_CODE
+		where 1=1
+		and B.ID=#{id}
+
+	</select>
+
+	<select id="pass" resultMap="base" parameterType="HoldInfo">
+		update
+		t_cert_user_hold_info
+		set
+		STATUS=#{status},
+		remark = #{remark}
+		where 1=1
+		and
+		id=#{id}
+	</select>
+
+	<!-- reporttable -->
+	<!-- 机构岗位持证率 -->
+	<select id="findOrglist" resultMap="base" parameterType="HoldInfo">
+		select user_id,
+		user_name,
+		SEX,
+		BIRTHDAY,
+		USER_CLASS,
+		POS,
+		DEP_CODE,
+		ORG_NO,
+		cert_code,
+		ORG_NAME
+		from (SELECT a.user_id, --用户ID
+		a.user_name, --用户姓名
+		A.SEX, --性别
+		A.BIRTHDAY, --出生年月日
+		A.USER_CLASS, --用工类别
+		A.POS, --岗位
+		A.DEP_CODE, --业务部门
+		A.ORG_NO, --所属机构
+		C.cert_code, --证书CODE
+		D.ORG_NAME
+		--机构名称
+		FROM T_SYS_USER_INFO A
+		LEFT
+		JOIN t_cert_job_cfg B
+		ON A.POS =
+		B.POS_CODE
+		LEFT JOIN t_cert_user_hold_info C
+		ON B.CERT_CODE =
+		C.CERT_CODE
+		LEFT JOIN T_SYS_ORG_INFO D
+		ON D.ORG_NO =
+		A.ORG_NO
+		where 1 = 1
+		<if test="orgNo != null and orgNo != '' ">
+			AND A.ORG_NO=#{orgNo}
+		</if>
+		<if test="pos != null and pos != '' ">
+			AND A.POS=#{pos}
+		</if>
+		)
+		where 1 = 1
+		AND cert_code is null
+		group by user_id,
+		user_name,
+		SEX,
+		BIRTHDAY,
+		USER_CLASS,
+		POS,
+		DEP_CODE,
+		ORG_NO,
+		cert_code,
+		ORG_NAME
+	</select>
+
+	<select id="userCertInfo" resultMap="base" parameterType="HoldInfo">
+		SELECT
+		rownum,
+		TT.USER_ID,
+		TT.USER_NAME,
+		TT.SEX,
+		TT.BIRTHDAY,
+		TT.USER_CLASS,
+		TT.POS,
+		TT.ORG_NO,
+		TT.ORG_NAME,
+		TT.ORG_NAME_2ND,
+		TT.ORG_NAME_3RD,
+		wmsys.wm_concat(decode(TT.ADM_CLASS, 1, CCODE)) zyzg,
+		wmsys.wm_concat(decode(TT.ADM_CLASS, 2, CCODE)) cyzg,
+		wmsys.wm_concat(decode(TT.ADM_CLASS, 3, CCODE)) gwzg,
+		wmsys.wm_concat(decode(TT.ADM_CLASS, 4, CCODE)) jnjd
+		FROM (
+		SELECT
+		A.USER_ID,
+		A.USER_NAME,
+		DSEX.P_NAME SEX,
+		A.BIRTHDAY,
+		DUCLASS.P_NAME
+		USER_CLASS,
+		DPOS.P_NAME POS,
+		B.CERT_CODE,
+		C.ORG_NO,
+		C.ORG_NAME,
+		C.ORG_NAME_2ND,
+		C.ORG_NAME_3RD,
+		T.ADM_CLASS,
+		wmsys.wm_concat(T.Cert_Code) CCODE
+		FROM
+		T_SYS_USER_INFO A
+		LEFT JOIN
+		T_CERT_USER_HOLD_INFO B
+		ON B.USER_ID =
+		A.USER_ID
+		LEFT JOIN T_SYS_ORG_INFO
+		O
+		ON O.ORG_NO=A.ORG_NO
+		LEFT JOIN
+		T_CERT_INFO T
+		ON B.Cert_Code =
+		T.Cert_Code
+		LEFT JOIN T_SYS_ORG_INFO C
+		ON C.ORG_NO = A.ORG_NO
+		LEFT JOIN
+		T_SYS_DIC_INFO D
+		ON D.P_VALUE = A.POS
+		LEFT JOIN T_SYS_DIC_INFO DSEX
+		ON
+		DSEX.P_VALUE = A.SEX
+		AND DSEX.TYPE_CODE = 'DIC_USER_SEX'
+		LEFT JOIN
+		T_SYS_DIC_INFO DUCLASS
+		ON DUCLASS.P_VALUE = A.USER_CLASS
+		AND
+		DUCLASS.TYPE_CODE = 'DIC_USER_CLASS'
+		LEFT JOIN T_SYS_DIC_INFO DPOS
+		ON
+		DPOS.P_VALUE = A.POS AND DPOS.TYPE_CODE = 'DIC_USER_POSITION'
+		WHERE 1 =
+		1
+		<if test="orgNo != null and orgNo != '' ">
+			AND C.ORG_NO IN (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{orgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+		<if test="pos != null and pos != '' ">
+			AND A.POS=#{pos}
+		</if>
+		<if test="userName != null and userName != '' ">
+			AND A.USER_NAME like '%'||#{userName}||'%'
+		</if>
+		<if test="userClass != null and userClass != '' ">
+			AND A.USER_CLASS=#{userClass}
+		</if>
+		<!-- **************** -->
+		<!-- <if test="orgNo1st != null and orgNo1st != '' "> AND O.ORG_NO_1ST=#{orgNo1st} </if> -->
+		<!-- <if test="orgNo2nd != null and orgNo2nd != '' "> AND O.ORG_NO_2ND=#{orgNo2nd} </if> -->
+		<!-- <if test="orgNo3rd != null and orgNo3rd != '' "> AND O.ORG_NO_3RD=#{orgNo3rd} </if> -->
+		<!-- <if test="orgNo4th != null and orgNo4th != '' "> AND O.ORG_NO_4TH=#{orgNo4th} </if> -->
+		group by A.USER_ID,
+		A.USER_NAME,
+		DSEX.P_NAME,
+		A.BIRTHDAY,
+		DUCLASS.P_NAME,
+		DPOS.P_NAME,
+		B.CERT_CODE,
+		C.ORG_NO,
+		C.ORG_NAME,
+		C.ORG_NAME_2ND,
+		C.ORG_NAME_3RD,
+		T.ADM_CLASS
+		) TT
+		group by
+		rownum,
+		TT.USER_ID,
+		TT.USER_NAME,
+		TT.SEX,
+		TT.BIRTHDAY,
+		TT.USER_CLASS,
+		TT.POS,
+		TT.ORG_NO,
+		TT.ORG_NAME,
+		TT.ORG_NAME_2ND,
+		TT.ORG_NAME_3RD
+	</select>
+
+	<select id="findHoldCertInfo" resultMap="base" parameterType="HoldInfo">
+		<!-- SELECT ROWNUM, H.ID, H.USER_ID, H.USER_CERT, H.CERT_CODE, H.ISSUE_DATE, H.ISSUE_ORG, H.CERT_LEVEL, H.CERT_SCORE, H.STATUS, H.REMARK, U.USER_NAME, U.TEL, U.CERT_NO, O.ORG_NO, O.ORG_NAME, U.POS, U.USER_CLASS, 
+			C.CERT_NAME, D.HOLD_REQ, C.INDUSTRY, C.ADM_CLASS, F.FILE_SAVE_NAME FROM T_CERT_USER_HOLD_INFO H, T_SYS_USER_INFO U, T_CERT_INFO C, T_SYS_ORG_INFO O, T_CERT_JOB_CFG D, T_CERT_ATT_INFO F WHERE H.USER_ID 
+			= U.USER_ID AND H.CERT_CODE = C.CERT_CODE AND U.ORG_NO = O.ORG_NO AND U.POS = D.POS_CODE AND C.CERT_CODE = D.CERT_CODE AND H.ID = F.TAB_ID -->
+		SELECT
+		U.USER_ID, U.USER_NAME,
+		U.POS,
+		C.ADM_CLASS,
+		C.INDUSTRY,
+		C.CERT_NAME,
+		C.CERT_CODE,
+		H.ISSUE_DATE,
+		H.ISSUE_ORG,
+		H.CERT_LEVEL,
+		H.CERT_SCORE,
+		H.REMARK,
+		A.FILE_SAVE_NAME
+		FROM T_CERT_USER_HOLD_INFO H
+		LEFT JOIN
+		T_SYS_USER_INFO U
+		ON H.USER_ID = U.USER_ID
+		LEFT JOIN T_CERT_INFO C
+		ON C.CERT_CODE = H.CERT_CODE
+		LEFT JOIN T_CERT_ATT_INFO A
+		ON A.TAB_ID =
+		H.ID
+		WHERE 1 = 1
+		<if test="id != null and id != '' ">
+			AND H.ID = #{id}
+		</if>
+	</select>
+</mapper>

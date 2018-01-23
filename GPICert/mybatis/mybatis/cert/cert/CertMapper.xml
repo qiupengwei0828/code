@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cert.dao.CertDao">
+	<resultMap id="base" type="Cert"></resultMap>
+	<select id="findAllList" resultMap="base" parameterType="Cert">
+		SELECT
+		t.*,t.cert_code||'|'||t.cert_name code_name
+		FROM
+		T_CERT_INFO t
+		where 1=1
+		<if test="certCode != null and certCode !='' ">
+			AND t.CERT_CODE = #{certCode}
+		</if>
+		<if test="certName!= null and certName != '' ">
+			AND t.CERT_NAME like '%'||#{certName}||'%'
+		</if>
+		<if test="industry!= null and industry !='' ">
+			AND t.INDUSTRY = #{industry}
+		</if>
+		<if test="admClass != null and admClass !='' ">
+			AND t.ADM_CLASS = #{admClass}
+		</if>
+		ORDER BY cert_code asc
+	</select>
+	<select id="find" resultMap="base" parameterType="Cert">
+		SELECT
+		t.*
+		FROM
+		T_CERT_INFO t
+		where 1=1
+		<if test="certCode != null and certCode !='' ">
+			AND t.CERT_CODE = #{certCode}
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Cert">
+		INSERT INTO
+		T_CERT_INFO (
+		CERT_CODE,
+		CERT_NAME,
+		INDUSTRY,
+		CERT_UNIT,
+		ADM_CLASS,
+		USEFUL_LIFE,
+		REMARK,
+		STATUS
+		)
+		values(
+		#{certCode},
+		#{certName},
+		#{industry},
+		#{certUnit},
+		#{admClass},
+		#{usefulLife},
+		#{remark},
+		#{status}
+		)
+	</select>
+	<select id="update" resultMap="base" parameterType="Cert">
+		update
+		T_CERT_INFO
+		set
+		CERT_NAME= #{certName},
+		INDUSTRY= #{industry},
+		CERT_UNIT=#{certUnit},
+		ADM_CLASS=#{admClass},
+		USEFUL_LIFE=#{usefulLife},
+		REMARK= #{remark}
+		where
+		CERT_CODE= #{certCode}
+	</select>
+	<select id="delete" resultMap="base" parameterType="Cert">
+		DELETE FROM
+		T_CERT_INFO where
+		cert_code=#{certCode}
+	</select>
+	<select id="existsCertCode" resultMap="base" parameterType="Cert">
+		SELECT
+		t.*
+		FROM
+		T_CERT_INFO t
+		WHERE
+		CERT_CODE= #{certCode}
+	</select>
+
+	<!-- tagCertList -->
+	<select id="findByPage" resultMap="base" parameterType="Cert">
+		select
+		t.*
+		FROM
+		T_CERT_INFO t
+		where 1=1
+		<if test="param.posCode != null and param.posCode != '' ">
+			and t.cert_CODE not in (select cert_code from t_cert_job_cfg where pos_code = #{param.posCode})
+		</if>
+		<if test="param.certCode!= null and param.certCode != '' ">
+			AND t.cert_code = #{param.certCode}
+		</if>
+		<if test="param.industry!= null and param.industry != '' ">
+			AND t.industry = #{param.industry}
+		</if>
+		<if test="param.admClass!= null and param.admClass != '' ">
+			AND t.adm_class = #{param.admClass}
+		</if>
+		<if test="param.certName!= null and param.certName != '' ">
+			AND t.cert_name like '%'||#{param.certName}||'%'
+		</if>
+		ORDER BY cert_code
+	</select>
+</mapper>

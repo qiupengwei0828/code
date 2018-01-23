@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cert.dao.CertAttInfoDao">
+	<!-- com.cert.dao.HoldInfoDao -->
+	<resultMap id="base" type="CertAttInfo"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="CertAttInfo">
+		SELECT
+		t.*
+		FROM
+		t_cert_att_info t
+		where 1=1
+		<if test=" fileId!= null and fileId != '' ">
+			AND t.fileId = #{fileId}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="CertAttInfo">
+		INSERT INTO
+		t_cert_att_info (
+		FILE_ID,
+		APP_CODE,
+		CFG_ID,
+		TAB,
+		TAB_ID,
+		FILE_NAME,
+		FILE_TYPE,
+		FILE_SAVE_NAME,
+		CRT_DATE,
+		FILE_SIZE
+		)
+		values(
+		#{fileId},
+		#{appCode},
+		#{cfgId},
+		#{tab},
+		#{tabId},
+		#{fileName},
+		#{fileType},
+		#{fileSaveName},
+		#{crtDate},
+		#{fileSize}
+		)
+	</select>
+	<select id="getKey" resultType="Long" parameterType="CertAttInfo">
+		SELECT
+		s_key.nextval from dual
+	</select>
+
+	<select id="update" resultMap="base" parameterType="CertAttInfo">
+		update
+		t_cert_att_info
+		set
+		APP_CODE=#{appCode},
+		CFG_ID =#{cfgId},
+		TAB=#{tab},
+		TAB_ID=#{tabId},
+		FILE_NAME=#{fileName},
+		FILE_TYPE=#{fileType},
+		FILE_SAVE_NAME=#{fileSaveName},
+		CRT_DATE=#{crtDate},
+		FILE_SIZE=#{fileSize}
+		where
+		FILE_ID = #{fileId}
+	</select>
+	<select id="updateTabInfo" resultMap="base" parameterType="CertAttInfo">
+		update
+		t_cert_att_info
+		set
+		TAB=#{tab},
+		TAB_ID=#{tabId}
+		where
+		FILE_ID
+		=#{fileId}
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="CertAttInfo">
+		DELETE FROM
+		t_cert_att_info where 1=1
+		<if test=" fileId!= null and fileId != '' ">
+			and t.fileId = #{fileId}
+		</if>
+		<if test=" tabId != null and tabId != '' ">
+			and tab_id = #{tabId}
+		</if>
+	</select>
+
+	<select id="deleteCertImg" resultMap="base" parameterType="CertAttInfo">
+		DELETE
+		t_cert_att_info t where 1=1
+		and t.file_id = #{fileId}
+	</select>
+
+	<select id="updateCertImg" resultMap="base" parameterType="CertAttInfo">
+		DELETE FROM
+		t_cert_att_info where
+		FILE_ID = #{fileId}
+	</select>
+</mapper>

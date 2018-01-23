@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cert.dao.CertJobCfgDao">
+
+	<resultMap id="base" type="CertJobCfg"></resultMap>
+
+	<!-- 添加分页 -->
+	<select id="findByPage" resultMap="base" parameterType="CertJobCfg">
+		select distinct
+		a.*, b.cert_name
+		from
+		T_CERT_JOB_CFG a
+		left join
+		t_cert_info b
+		on
+		a.cert_code = b.cert_code
+		where
+		1 = 1
+		<if test="param.posCode != null and param.posCode != '' ">
+			AND pos_code = #{param.posCode}
+		</if>
+		<if test="param.certCode != null and param.certCode != '' ">
+			AND CERT_CODE = #{param.certCode}
+		</if>
+		<if test="param.holdReq != null and param.holdReq != '' ">
+			AND HOLD_REQ = #{param.holdReq}
+		</if>
+	</select>
+
+	<select id="findJobCfg" resultMap="base" parameterType="CertJobCfg">
+		select tt.pos_code,
+		wmsys.wm_concat(decode(tt.hold_req, 1, certs))
+		hold_1,
+		wmsys.wm_concat(decode(tt.hold_req, 2, certs)) hold_2,
+		wmsys.wm_concat(decode(tt.hold_req, 3, certs)) hold_3
+		from (
+		select
+		t.pos_code,
+		t.hold_req,
+		wmsys.wm_concat(t.cert_code) certs
+		from
+		T_CERT_JOB_CFG t
+		group
+		by t.pos_code, t.hold_req) tt
+		WHERE 1=1
+		<if test="param.posCode != null and param.posCode != '' ">
+			AND pos_code = #{param.posCode}
+		</if>
+		group by tt.pos_code
+		order by tt.pos_code
+	</select>
+
+	<select id="findCertCode" resultMap="base" parameterType="CertJobCfg">
+		select
+		*
+		from
+		T_CERT_JOB_CFG where 1 = 1
+		<if test="posCode != null and posCode != '' ">
+			and pos_code=#{posCode}
+		</if>
+		<if test="certCode != null and certCode != '' ">
+			AND CERT_CODE = #{certCode}
+		</if>
+	</select>
+
+
+	<select id="delete" resultMap="base" parameterType="CertJobCfg">
+		<![CDATA[
+		DELETE FROM
+			T_CERT_JOB_CFG
+		where
+			ID = #{id}
+		]]>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="CertJobCfg">
+		select
+		a.*,
+		b.cert_name
+		from
+		T_CERT_JOB_CFG a
+		left join
+		t_cert_info b
+		on
+		a.cert_code = b.cert_code
+		where
+		1 = 1
+		<if test="id != null and id != '' ">
+			AND a.ID = #{id}
+		</if>
+		<if test="posCode != null and posCode != '' ">
+			AND a.pos_code = #{posCode}
+		</if>
+		<if test="certCode != null and certCode != '' ">
+			AND a.cert_code = #{certCode}
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="CertJobCfg">
+		<![CDATA[
+		insert into
+			t_cert_job_cfg(
+				id,
+				cert_code,
+				pos_code,
+				hold_req,
+				remark
+			)
+		values(
+			s_key.nextval,
+			#{certCode},
+			#{posCode},
+			#{holdReq},
+			#{remark}
+			)
+		]]>
+	</select>
+
+	<select id="update" resultMap="base" parameterType="CertJobCfg">
+		<![CDATA[
+		UPDATE
+			T_CERT_JOB_CFG
+		SET
+			CERT_CODE=#{certCode},
+			POS_CODE=#{posCode},
+			HOLD_REQ=#{holdReq},
+			REMARK=#{remark}
+		where
+			ID=#{id}
+		]]>
+	</select>
+
+	<!-- 岗位持证情况检查 -->
+	<select id="findCertList" resultMap="base" parameterType="CertJobCfg">
+		select
+		t.user_id,
+		t.user_name,
+		t.pos,
+		t.org_no,
+		wmsys.wm_concat(t.cert_code) yqcy_cert,
+		wmsys.wm_concat(decode(t.ych_cert_code, null, null,
+		t.ych_cert_code))
+		ycy_cert,
+		wmsys.wm_concat(decode(t.ych_cert_code, null, t.cert_code))
+		wcy_cert
+		from (
+		select
+		a.user_id,
+		a.user_name,
+		a.org_no,
+		a.pos,
+		b.cert_code,
+		b.pos_code,
+		b.hold_req,
+		c.cert_code ych_cert_code
+		from
+		t_sys_user_info a
+		left join t_cert_job_cfg b
+		on a.pos = b.pos_code
+		LEFT JOIN
+		T_SYS_ORG_INFO O
+		ON O.ORG_NO=A.ORG_NO
+		left join t_cert_user_hold_info c
+		on c.user_id = a.user_id and b.cert_code = c.cert_code
+		where 1=1
+		<if test="param.orgNo != null and param.orgNo != '' ">
+			AND o.org_no in (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.orgNo}
+			CONNECT BY PRIOR TT.ORG_NO = TT.P_ORG_NO
+			)
+		</if>
+		<if test="param.pos != null and param.pos != '' ">
+			AND a.pos = #{param.pos}
+		</if>
+		<if test="param.userName != null and param.userName != '' ">
+			AND a.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<!-- ****************** -->
+		<!-- <if test="param.orgNo1st != null and param.orgNo1st != '' "> AND O.ORG_NO_1ST=#{param.orgNo1st} </if> <if test="param.orgNo2nd != null and param.orgNo2nd 
+			!= '' "> AND O.ORG_NO_2ND=#{param.orgNo2nd} </if> <if test="param.orgNo3rd != null and param.orgNo3rd != '' "> AND O.ORG_NO_3RD=#{param.orgNo3rd} </if> 
+			<if test="param.orgNo4th != null and param.orgNo4th != '' "> AND O.ORG_NO_4TH=#{param.orgNo4th} </if> -->
+		and b.hold_req='1'
+		) t
+		group by
+		t.user_id,
+		t.user_name,
+		t.pos,
+		t.org_no
+		order by t.pos
+	</select>
+
+	<!-- 当前岗位持证情况 -->
+	<select id="findinfo" resultMap="base" parameterType="CertJobCfg">
+		SELECT A.USER_ID,
+		A.USER_NAME,
+		A.HR_NO,
+		A.ORG_NO,
+		A.POS,
+		B.CERT_CODE,
+		B.POS_CODE,
+		B.HOLD_REQ,
+		C.CERT_NO,
+		C.ISSUE_DATE,
+		C.STATUS,
+		D.CERT_NAME,
+		D.INDUSTRY,
+		D.ADM_CLASS,
+		E.ORG_NAME
+		FROM T_SYS_USER_INFO A
+		LEFT JOIN T_CERT_JOB_CFG B
+		ON A.POS = B.POS_CODE
+		LEFT JOIN T_CERT_USER_HOLD_INFO C
+		ON C.CERT_CODE =
+		B.CERT_CODE
+		LEFT JOIN T_CERT_INFO D
+		ON D.CERT_CODE = B.CERT_CODE
+		LEFT JOIN T_SYS_ORG_INFO E
+		ON E.ORG_NO = A.ORG_NO
+		WHERE 1 = 1
+		<if test="userId != null and userId != '' ">
+			and a.user_id = #{userId}
+		</if>
+		ORDER BY B.CERT_CODE
+	</select>
+
+	<!-- 岗位持证详情 -->
+	<select id="jobCertHoldInfo" resultMap="base" parameterType="CertJobCfg">
+		select
+		J.ID,
+		J.CERT_CODE,
+		J.POS_CODE,
+		J.HOLD_REQ,
+		C.CERT_NAME,
+		C.REMARK
+		from
+		T_CERT_JOB_CFG J
+		LEFT JOIN T_CERT_INFO C
+		ON C.CERT_CODE = J.CERT_CODE
+		WHERE 1=1
+		AND J.POS_CODE = #{posCode}
+		ORDER BY J.HOLD_REQ
+	</select>
+
+</mapper>
