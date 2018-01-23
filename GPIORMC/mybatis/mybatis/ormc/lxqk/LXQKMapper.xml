@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ormc.dao.LxqkDao">
+
+	<!-- <select id="mapQuery" resultType="java.util.HashMap" parameterType="Lxqk" resultMap="mapAttr"> -->
+	<select id="mapQuery" resultType="java.util.HashMap">
+		SELECT * FROM V_MODE_LXQK T WHERE 1=1
+	</select>
+
+	<select id="queryAllData" resultType="java.util.HashMap" parameterType="java.util.Map">
+		SELECT * FROM V_MODE_LXQK T WHERE 1=1
+		<if test="creditUserID != '' and creditUserID != null">
+		<![CDATA[
+			AND T.信贷员ID = #{creditUserID}
+		]]>
+		</if>
+		<if test="loanTypeName != null and loanTypeName != '' ">
+		<![CDATA[
+			AND T.贷款种类名称 = #{loanTypeName}
+		]]>
+		</if>
+		<if test="transferAcc != null and transferAcc != '' ">
+		<![CDATA[
+			AND T.转出账号 = #{transferAcc}
+		]]>
+		</if>
+		<if test="beginDate != null and beginDate != '' ">
+		<![CDATA[
+			AND T.贷款起期 >= #{beginDate}
+		]]>
+		</if>
+		<if test="endDate != null and endDate != '' ">
+		<![CDATA[
+			AND T.贷款止期 <= #{endDate}
+		]]>
+		</if>
+	</select>
+
+</mapper>

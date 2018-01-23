@@ -1,0 +1,195 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<!DOCTYPE html>
+<html style="overflow-x:auto;overflow-y:auto;">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+
+<%@include file="/WEB-INF/views/include/head.jsp"%>
+
+<!-- jqGrid -->
+<script src="${ctxStatic}/jqGrid/4.8/i18n/grid.locale-cn.js" type="text/javascript"></script>
+<script src="${ctxStatic}/jqGrid/4.8/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+<link href="${ctxStatic}/jqGrid/4.8/css/ui.jqgrid.css" type="text/css" rel="stylesheet" />
+<!-- jqGrid -->
+
+</head>
+<script type="text/javascript">
+	//重置选择内容
+	$(document).ready(function() {
+
+	});
+</script>
+<body>
+	<form id="searchForm" action="${ctx}/ormc/xdyzjwl/list" method="post" class="breadcrumb form-search">
+		<label>信贷员ID</label>
+		<!--  -->
+		<input id="creditUserID" name="creditUserID" type="text" value="${creditUserID}" style="width: 145px;" />
+		<!--  -->
+		<label>贷款种类名称</label>
+		<!--  -->
+		<input id="loanTypeName" name="loanTypeName" type="text" value="${loanTypeName}" style="width: 145px;" />
+		<!--  -->
+		<label>转出账号</label>
+		<!--  -->
+		<input id="transferAcc" name="transferAcc" type="text" value="${transferAcc}" style="width: 145px;" />
+		<!--  -->
+		<label>贷款起/止日期</label>
+		<!--  -->
+		<input id="beginDate" name="beginDate" type="text" readonly="readonly" maxlength="20" class="input-mini Wdate" value="<fmt:formatDate value="${beginDate}" pattern="yyyy-MM-dd"/>" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});" style="width: 100px;" />
+		<!--  -->
+		<label>---</label>
+		<!--  -->
+		<input id="endDate" name="endDate" type="text" readonly="readonly" maxlength="20" class="input-mini Wdate" value="<fmt:formatDate value="${endDate}" pattern="yyyy-MM-dd"/>" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});" style="width: 100px;" />
+
+		<!--  -->
+		<input id="btnFind" class="btn btn-primary" type="button" value="查询" />
+
+		<!--  -->
+		<input id="btnReset" class="btn btn-primary" type="button" value="重置" />
+	</form>
+
+	<table id="jqGrid"></table>
+
+	<div id="jqGridPager"></div>
+
+	<script>
+		var dates = ${jsonDate};
+		$(document).ready(function() {
+
+			function formatEdits(cellValue, options, rowObject) {
+				return "<a href='" + "${ctx}/ormc/xdyzjwl/info?id=" + cellValue + "'>" + "详情" + "</a>";
+			}
+
+			$("#jqGrid").jqGrid({
+				datatype : "local",
+				data : dates,
+				height : 1000,
+				colModel : [ {
+					label : '机构名称',
+					name : '机构名称',
+					align : 'center'
+				}, {
+					label : '一支名称',
+					name : '一支名称',
+					align : 'center'
+				}, {
+					label : '所属二分',
+					name : '所属二分',
+					align : 'center'
+				}, {
+					label : '客户号',
+					name : '客户号',
+					align : 'center'
+				}, {
+					label : '贷款起期',
+					name : '贷款起期',
+					align : 'center'
+				}, {
+					label : '贷款止期',
+					name : '贷款止期',
+					align : 'center'
+				}, {
+					label : '还款姓名',
+					name : '还款姓名',
+					align : 'center'
+				}, {
+					label : '还款账号',
+					name : '还款账号',
+					align : 'center'
+				}, {
+					label : '贷款金额',
+					name : '贷款金额',
+					align : 'center'
+				}, {
+					label : '贷款余额',
+					name : '贷款余额',
+					align : 'center'
+				}, {
+					label : '贷款种类名称',
+					name : '贷款种类名称',
+					align : 'center'
+				}, {
+					label : '还款方式',
+					name : '还款方式',
+					align : 'center'
+				}, {
+					label : '信贷员ID',
+					name : '信贷员ID',
+					align : 'center'
+				}, {
+					label : '交易机构',
+					name : '交易机构',
+					align : 'center'
+				}, {
+					label : '交易日期',
+					name : '交易日期',
+					align : 'center'
+				}, {
+					label : '转入姓名',
+					name : '转入姓名',
+					align : 'center'
+				}, {
+					label : '转出姓名',
+					name : '转出姓名',
+					align : 'center'
+				}, {
+					label : '交易金额',
+					name : '交易金额',
+					align : 'center'
+				}, {
+					label : '参与交易信贷员姓名',
+					name : '参与交易信贷员姓名',
+					align : 'center'
+				}, {
+					label : '参与交易贷款笔数',
+					name : '参与交易贷款笔数',
+					align : 'center'
+				//	}, {
+				//	label : '操作',
+				//	name : '贷款ID',
+				//	formatter : formatEdits,
+				//	align : 'center'//文本显示位置
+				} ],
+				//本地化
+				regional : 'cn',
+				//自动列宽   
+				autowidth : true,
+				//设置斑马色表格
+				altRows : true,
+				//显示序号
+				rownumbers : true,
+				//显示数据条数
+				viewrecords : true,
+				//表格宽度
+				width : $(top.document).width() - 210,
+				//表格高度
+				height : $(top.document).height() - 280,
+				//每页条数
+				rowNum : 20,
+				loadonce : true,
+				//分页DIV的ID
+				pager : "#jqGridPager",
+				viewrecords : true
+			//caption : "Load jqGrid through Javascript Array"
+			});
+		});
+	</script>
+
+	<script type="text/javascript">
+		$("#btnFind").click(function() {
+			$("#searchForm").submit();
+		});
+		$("#btnReset").click(function() {
+			$("#creditUserID").val("");
+			$("#loanTypeName").val("");
+			$("#transferAcc").val("");
+			$("#beginDate").val("");
+			$("#endDate").val("");
+			$("#searchForm").submit();
+		});
+	</script>
+
+</body>
+</html>
