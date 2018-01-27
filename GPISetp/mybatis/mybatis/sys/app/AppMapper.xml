@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.AppDao">
+
+	<!-- com.sys.entity.App -->
+	<resultMap id="base" type="App"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="App">
+		SELECT t.*,o.org_name
+		FROM T_SYS_APP_INFO t
+		left join t_sys_org_info o
+		on t.org_no = o.org_no
+		WHERE 1=1
+		<if test="appCode != null and appCode!='' ">
+			AND t.app_code = #{appCode}
+		</if>
+	</select>
+
+
+	<select id="findAllApp" resultMap="base" parameterType="App">
+		SELECT
+		t.*,o.org_name
+		FROM T_SYS_APP_INFO t
+		left join t_sys_org_info o
+		on
+		t.org_no = o.org_no
+		order by sort
+	</select>
+
+	<select id="findAppCode" resultMap="base" parameterType="App">
+		SELECT
+		APP_CODE
+		FROM
+		T_SYS_APP_INFO
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="App">
+		SELECT t.* FROM T_SYS_APP_INFO t WHERE 1=1
+		<if test="param.appCode!= null and param.appCode!='' ">
+			AND t.appCode=#{param.appCode}
+		</if>
+		<if test="param.status!= null and param.status!= '' ">
+			AND t.status=#{param.status}
+		</if>
+
+	</select>
+
+
+	<select id="count" resultType="int" parameterType="App">
+		SELECT
+		count(*) FROM T_SYS_APP_INFO t WHERE 1=1
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="App">
+		<![CDATA[
+		INSERT INTO
+			T_SYS_APP_INFO (
+				APP_CODE,
+				APP_NAME,
+				DEP_CODE,
+				ORG_NO,
+				ACC_URL,
+				STATUS,
+				REMARK,
+				ICON,
+				OPEN_PAGE,
+				DIS_ICON,
+				SORT
+			)
+			values(
+				#{appCode},
+				#{appName},
+				#{depCode},
+				#{orgNo},
+				#{accUrl},
+				#{status},
+				#{remark},
+				#{icon},
+				#{openPage},
+				#{disIcon},
+				#{sort}
+			)
+		]]>
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="App">
+		DELETE FROM
+		T_SYS_APP_INFO
+		where
+		APP_CODE = #{appCode}
+	</select>
+
+	<select id="existsAppCode" resultMap="base" parameterType="App">
+		SELECT t.* FROM
+		T_SYS_APP_INFO t
+		WHERE
+		APP_CODE = #{appCode}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="App">
+		<![CDATA[
+		update
+			T_SYS_APP_INFO
+		set 
+			APP_NAME = #{appName},
+			DEP_CODE = #{depCode},
+			ORG_No = #{orgNo},
+			ACC_URL =  #{accUrl},
+			STATUS = #{status},
+			REMARK = #{remark},
+			ICON =  #{icon},
+			OPEN_PAGE =  #{openPage},
+			DIS_ICON =  #{disIcon},
+			SORT = #{sort}
+		where
+			APP_CODE = #{appCode}
+		]]>
+	</select>
+
+</mapper>

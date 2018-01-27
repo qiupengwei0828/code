@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.setp.dao.SetpCountDao">
+
+	<resultMap id="base" type="SetpCount"></resultMap>
+
+	<select id="getDim" resultMap="base" parameterType="SetpUser">
+		SELECT TT.ORG_NO
+		FROM T_SYS_ORG_INFO TT
+		START WITH TT.ORG_NO = #{orgNo}
+		CONNECT BY PRIOR
+		TT.P_ORG_NO = TT.ORG_NO
+	</select>
+
+	<!-- 部门平均排名 -->
+	<select id="org_avg_setp_num" resultMap="base" parameterType="SetpCount">
+		SELECT rownum, ORG_NO, ORG_NAME, AVG_SETP_NUM AS NUM
+		FROM (SELECT T.ORG_NO,
+		T.ORG_NAME,
+		floor(CASE
+		WHEN COUNT(DISTINCT T.USER_ID) = 0 THEN
+		0
+		ELSE
+		SUM(NVL(T.SETP_SUM, 0)) / COUNT(DISTINCT T.USER_ID)
+		END) AVG_SETP_NUM
+		FROM (SELECT
+		A.USER_ID,
+		A.USER_NAME,
+		<if test="dim == 1 ">
+			O.Org_No_2nd as ORG_NO,
+			O.ORG_NAME_2ND as ORG_NAME,
+		</if>
+		<if test="dim == 2 ">
+			O.ORG_NO_3RD as ORG_NO,
+			O.ORG_NAME_3RD as ORG_NAME,
+		</if>
+		<if test="dim == 3 ">
+			O.ORG_NO_4TH as ORG_NO,
+			O.ORG_NAME_4TH as ORG_NAME,
+		</if>
+		<if test="dim == 4 ">
+			O.ORG_NO as ORG_NO,
+			O.ORG_NAME as ORG_NAME,
+		</if>
+		A.MOBILE,
+		NN.SETP_SUM
+		FROM T_SYS_ORG_INFO O
+		LEFT JOIN T_SETP_USER A
+		ON O.ORG_NO = A.ORG_NO
+		LEFT JOIN (SELECT N.USER_ID,
+		SUM(N.SETP_NUM) SETP_SUM
+		FROM
+		T_SETP_NUMBER N
+		WHERE 1 = 1
+		<if test="beginDate != null and beginDate != '' ">
+			and n.deal_time <![CDATA[ >= ]]>
+			to_date(#{beginDate}||' 00:00:01', 'YYYY-MM-DD hh24:mi:ss')
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			and n.deal_time <![CDATA[ <= ]]>
+			to_date(#{endDate}||' 23:59:59', 'YYYY-MM-DD hh24:mi:ss')
+		</if>
+		GROUP BY
+		N.USER_ID) NN
+		ON A.USER_ID = NN.USER_ID
+		WHERE 1 = 1
+		<if test="dim == 1 ">
+			AND O.ORG_NO_1ST = #{orgNo}
+		</if>
+		<if test="dim == 2 ">
+			AND O.Org_No_2nd = #{orgNo}
+		</if>
+		<if test="dim == 3 ">
+			AND O.ORG_NO_4TH = #{orgNo}
+		</if>
+		<if test="dim == 4 ">
+			AND O.ORG_NO_4TH = #{orgNo}
+		</if>
+		) T
+		GROUP BY
+		T.ORG_NO,
+		T.ORG_NAME
+		order by AVG_SETP_NUM desc
+		)
+	</select>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.setp.dao.SetpUserDao">
+
+	<resultMap id="base" type="SetpUser"></resultMap>
+
+	<select id="user_sum_setp_num" resultMap="base" parameterType="SetpUser">
+		select
+		rownum,user_id, user_name,org_no_2nd,org_name_2nd, org_no, org_name, mobile, setp_num
+		from(
+		select user_id, user_name,org_no_2nd,org_name_2nd,
+		org_no, org_name, mobile, setp_num
+		from (select
+		a.user_id,
+		a.user_name,
+		o.org_no_2nd,
+		o.org_name_2nd,
+		o.org_no,
+		o.org_name,
+		a.mobile,
+		nvl(nn.setp_sum, 0)
+		setp_num
+		from t_setp_user a
+		left join (select n.user_id, nvl(sum(n.setp_num), 0)
+		setp_sum
+		from t_setp_number n
+		where 1 = 1
+		<if test="beginDate != null and beginDate != '' ">
+			and n.deal_time <![CDATA[ >= ]]>
+			to_date(#{beginDate}||' 00:00:01', 'YYYY-MM-DD hh24:mi:ss')
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			and n.deal_time <![CDATA[ <= ]]>
+			to_date(#{endDate}||' 23:59:59', 'YYYY-MM-DD hh24:mi:ss')
+		</if>
+		group by n.user_id) nn
+		on a.user_id = nn.user_id
+		left join t_sys_org_info o
+		on a.org_no = o.org_no
+		where 1 = 1
+		and o.org_no IN
+		(SELECT TT.ORG_NO
+		FROM
+		T_SYS_ORG_INFO TT
+		START WITH TT.ORG_NO = #{orgNo}
+		CONNECT BY PRIOR TT.ORG_NO = TT.P_ORG_NO))
+		ORDER BY setp_num DESC
+		)
+	</select>
+
+</mapper>
