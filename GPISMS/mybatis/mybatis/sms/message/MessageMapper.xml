@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sms.dao.MessageDao">
+
+	<resultMap id="base" type="Message"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="Message">
+		SELECT
+		M.ID,
+		M.APP_CODE,
+		M.MOBILE,
+		M.CONTENT,
+		M.CRT_DATE,
+		DECODE(M.TYPE, '1', '短信', '2', '彩信', '其他') AS TYPE,
+		M.CHECK_TYPE,
+		M.REMARK,
+		DECODE(M.STATUS, '1', '待发送', '2', '发送失败', '3', '已发送', '') AS STATUS
+		FROM
+		T_SMS_MESSAGE M WHERE 1=1
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Message">
+		SELECT
+		M.ID,
+		M.APP_CODE,
+		M.MOBILE,
+		M.CONTENT,
+		M.CRT_DATE,
+		DECODE(M.TYPE, '1', '短信', '2', '彩信', '其他') AS TYPE,
+		M.CHECK_TYPE,
+		M.REMARK,
+		DECODE(M.STATUS, '1', '待发送', '2', '发送失败', '3', '已发送', '') AS STATUS
+		FROM
+		T_SMS_MESSAGE M WHERE 1=1
+		<if test="appCode != null and appCode !='' ">
+			AND M.APP_CODE = #{appCode}
+		</if>
+		<if test="status == '2' ">
+			<!-- status=2，发送失败短信 -->
+			AND M.STATUS = '2'
+		</if>
+		<if test="beginDate != null and beginDate != '' ">
+			<![CDATA[
+			AND M.CRT_DATE >= #{beginDate}
+			]]>
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			<![CDATA[
+			AND M.CRT_DATE <= #{endDate}
+			]]>
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Message">
+		INSERT INTO
+		T_SMS_MESSAGE(
+		ID,
+		SYS_CODE,
+		MOBILE,
+		CONTENT,
+		TYPE,
+		CRT_DATE,
+		CHECK_TYPE,
+		STATUS,
+		REMARK
+		) VALUES(
+		#{id},
+		#{sysCode},
+		#{mobile},
+		#{content},
+		#{type},
+		#{crtDate},
+		#{checkType},
+		#{status},
+		#{remark}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Message">
+		DELETE
+		T_SMS_MESSAGE WHERE ID = #{id}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="Message">
+		UPDATE
+		T_SMS_MESSAGE
+		SET
+		SYS_CODE = #{sysCode},
+		MOBILE = #{mobile},
+		CONTENT =
+		#{content},
+		TYPE = #{type},
+		CRT_DATE = #{crtDate},
+		CHECK_TYPE =
+		#{checkType},
+		STATUS = #{status},
+		REMARK = #{remark}
+		WHERE ID = #{id}
+	</select>
+
+</mapper>

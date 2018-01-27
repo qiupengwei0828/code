@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sms.dao.SentDao">
+
+	<resultMap id="base" type="Sent"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="Sent">
+		SELECT T.ID,
+		T.APP_CODE,
+		T.MOBILE,
+		T.CONTENT,
+		T.CRT_DATE,
+		DECODE(T.TYPE, '1', '短信', '2', '彩信', '其他') AS TYPE,
+		T.CHECK_TYPE,
+		T.REMARK,
+		T.SENT_DATE,
+		DECODE(T.STATUS, '1', '待发送', '2', '发送失败', '3', '已发送', '') AS
+		STATUS
+		FROM T_SMS_SENT T WHERE 1=1
+		<if test="id != null and id != '' ">
+			AND T.ID = #{id}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Sent">
+		SELECT T.ID,
+		T.APP_CODE,
+		T.MOBILE,
+		T.CONTENT,
+		T.CRT_DATE,
+		DECODE(T.TYPE, '1', '短信', '2', '彩信', '其他') AS TYPE,
+		T.CHECK_TYPE,
+		T.REMARK,
+		T.SENT_DATE,
+		DECODE(T.STATUS, '1', '待发送', '2', '发送失败', '3', '已发送', '') AS STATUS
+		FROM T_SMS_SENT T WHERE 1=1
+		<if test="appCode != null and appCode !='' ">
+			AND T.APP_CODE = #{appCode}
+		</if>
+		<if test="beginDate != null and beginDate != '' ">
+			<![CDATA[
+			AND T.CRT_DATE >= #{beginDate}
+			]]>
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			<![CDATA[
+			AND T.CRT_DATE <= #{endDate}
+			]]>
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Sent">
+		INSERT INTO
+		T_SMS_SENT(
+		ID,
+		SYS_CODE,
+		MOBILE,
+		CONTENT,
+		TYPE,
+		CRT_DATE,
+		CHECK_TYPE,
+		STATUS,
+		REMARK,
+		SENT_DATE,
+		RETURN_RESULT
+		) VALUES(
+		#{id},
+		#{sysCode},
+		#{mobile},
+		#{content},
+		#{type},
+		#{crtDate},
+		#{checkType},
+		#{status},
+		#{remark},
+		#{sentDate},
+		#{returnResult}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Sent">
+		DELETE
+		T_SMS_SENT WHERE ID=#{id}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="Sent">
+		UPDATE
+		T_SMS_SENT
+		SET
+		SYS_CODE = #{sysCode},
+		MOBILE = #{mobile},
+		CONTENT = #{content},
+		TYPE = #{type},
+		CRT_DATE = #{crtDate},
+		CHECK_TYPE =
+		#{checkType},
+		STATUS = #{status},
+		REMARK = #{remark}
+		SENT_DATE = #{sentDate},
+		RETURN_RESULT = #{returnResult}
+		WHERE ID = #{id}
+	</select>
+
+
+	<select id="sentCount" resultMap="base" parameterType="Sent">
+		<![CDATA[
+		SELECT
+			MONTH,
+			NVL(MSG_COUNT, 0) AS MSG_COUNT FROM
+		(
+			SELECT
+				D.MONTH,
+				SUM(TT.SUM_SENT) AS MSG_COUNT
+			FROM T_SYS_DATE D
+			LEFT JOIN (SELECT COUNT(1) SUM_SENT, T.SENT_DATE
+			FROM T_SMS_SENT T
+			GROUP BY T.SENT_DATE) TT
+			ON D.DATE_KEY = TT.SENT_DATE
+			WHERE D.DATE_KEY >= '2016-01-01'
+			AND D.DAY_DATE < SYSDATE
+			GROUP BY D.MONTH
+			ORDER BY D.MONTH
+		)
+		]]>
+	</select>
+
+	<select id="app_msg_count" resultMap="base" parameterType="Sent">
+		<![CDATA[
+		SELECT
+		    SS.APP_CODE,
+		    SUM(SS.MSG_COUNT) AS MSG_COUNT,
+		    A.MINI_NAME AS APP_NAME
+		FROM (
+		    SELECT
+		        COUNT(1) AS MSG_COUNT,
+		        S.ID,
+		        S.APP_CODE
+		    FROM T_SMS_SENT S
+		    GROUP BY S.ID, S.APP_CODE) SS
+		LEFT JOIN T_SYS_APP_INFO A
+		ON A.APP_CODE = SS.APP_CODE
+		GROUP BY SS.APP_CODE, A.MINI_NAME
+		ORDER BY SS.APP_CODE
+		]]>
+	</select>
+
+	<!-- test -->
+	<select id="mapQuery" resultType="java.util.HashMap" parameterType="Sent">
+		SELECT
+		A.APP_NAME,
+		S.ID,
+		S.APP_CODE,
+		S.MOBILE,
+		S.CONTENT,
+		S.TYPE,
+		S.CRT_DATE,
+		S.CHECK_TYPE,
+		S.STATUS,
+		S.REMARK,
+		S.SENT_DATE,
+		S.RETURN_RESULT
+		FROM T_SMS_SENT S
+		LEFT JOIN T_SYS_APP_INFO A
+		ON A.APP_CODE = S.APP_CODE
+		WHERE 1 = 1
+	</select>
+
+</mapper>
