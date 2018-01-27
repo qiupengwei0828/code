@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.DepDao">
+	<!-- com.sys.entity.App -->
+	<resultMap id="base" type="Dep"></resultMap>
+  <select id="findAllList" resultMap="base"  parameterType="Dep">
+     select  t.*  from   T_SYS_DEP_INFO  t
+     where 1=1 
+     <if test="depCode != null and depCode != '' ">
+			and t.dep_code=#{depCode}
+	 </if>
+	  <if test="depName != null and depName != '' ">
+			and t.dep_name like '%'||#{depName}||'%'
+	 </if>
+  </select>
+  <select id="insert" resultMap="base"  parameterType="Dep">
+     insert  into    
+     T_SYS_DEP_INFO
+     (DEP_CODE,
+      DEP_NAME,
+      REMARK,
+      STATUS
+      )
+     values(
+       #{depCode},
+       #{depName},
+       #{remark},
+       #{status}
+      )  
+      </select>
+    <select id="update" resultMap="base"  parameterType="Dep">
+       update 
+        T_SYS_DEP_INFO
+       set
+       (
+        DEP_NAME=#{depName},
+        REMARK=#{remark},
+        STATUS=#{status}
+         )
+      where 
+      DEP_CODE=#{depCode}     
+   </select>
+    <select  id="delete"    resultMap="base" parameterType="Dep">
+     delete    from    T_SYS_DEP_INFO
+     where 
+     DEP_CODE=#{depCode}  
+    </select>
+    
+    <select  id="existsDepCode" resultMap="base" parameterType="Dep" >
+       select  t.*   from    T_SYS_DEP_INFO  t
+       where 
+      DEP_CODE=#{depCode}  
+    </select>
+</mapper>

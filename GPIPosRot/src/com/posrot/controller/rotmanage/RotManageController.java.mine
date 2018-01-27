@@ -1,0 +1,752 @@
+package com.posrot.controller.rotmanage;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.base.controller.BaseController;
+import com.base.page.Page;
+import com.base.utils.DateUtils;
+import com.base.utils.security.AccountShiroUtil;
+import com.posrot.entity.PosLog;
+import com.posrot.entity.ResInfo;
+import com.posrot.entity.Rotation;
+import com.posrot.service.poslog.PosLogService;
+import com.posrot.service.res.ResService;
+import com.posrot.service.rotation.RotationService;
+import com.sys.entity.Pos;
+import com.sys.entity.User;
+import com.sys.service.org.OrgService;
+import com.sys.service.pos.PosService;
+import com.sys.service.user.UserService;
+
+/*
+ * 轮岗计划制定
+ */
+@Controller
+@RequestMapping("/posrot/rotManage/")
+public class RotManageController extends BaseController<Rotation> {
+
+	@Autowired
+	public RotationService rotationService;
+
+	@Autowired
+	public PosService posService;
+
+	@Autowired
+	public OrgService orgService;
+
+	@Autowired
+	public UserService userService;
+
+	@Autowired
+	public PosLogService posLogService;
+
+	@Autowired
+	public ResService resService;
+
+	// 制定轮岗
+	@RequestMapping("insert")
+	public String insert(Rotation rotation, PosLog pLog, Model model) {
+		long id = rotationService.getKey();
+		rotation.setCreUserId(AccountShiroUtil.getCurrentUser().getUserId());
+		rotation.setCreDate(DateUtils.getDate().toString());
+		rotation.setId(id);
+		rotationService.insert(rotation);
+		PosLog posLog = new PosLog();
+		posLog.setPlanId(id);
+		if ("1".equals(rotation.getStatus())) {
+			posLog.setActionCode("1");
+		} else if ("2".equals(rotation.getStatus())) {
+			posLog.setActionCode("2");
+		}
+		// 获取轮岗人姓名
+		posLog.setOpeContent(rotation.getRotUserName());
+		// 轮岗计划制定
+		posLogService.insert1(posLog);
+		return "redirect:/posrot/jobrotation/list";
+	}
+
+	// 修改轮岗
+	@RequestMapping("update")
+	public String update(Rotation rotation, Model model) {
+		rotation.setCreUserId(AccountShiroUtil.getCurrentUser().getUserId());
+		rotation.setCreDate(DateUtils.getDate().toString());
+		rotationService.update(rotation);
+		return "redirect:/posrot/rotManage/listall";
+	}
+
+	// 制定轮岗
+	@RequestMapping("delete")
+	public String delete(Rotation rotation, Model model) {
+		// 删除轮岗/强修日志
+		PosLog pLog = new PosLog();
+		pLog.setPlanId(rotation.getId());
+		posLogService.delete(pLog);
+
+		rotationService.delete(rotation);
+		return "redirect:/posrot/rotManage/listall";
+	}
+
+	// 修改轮岗计划
+	@RequestMapping("form")
+	public String form(Rotation rot, Model model) {
+		List<Pos> poslist = posService.findAllList(null);
+		model.addAttribute("poslist", poslist);
+
+		if (rot.getId() != null) {
+			Rotation rotation = rotationService.find(rot).get(0);// 根据ID查询计划
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String to_date = rotation.getToDate();
+			Date toDate = new Date();
+			try {
+				toDate = sdf.parse(to_date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			model.addAttribute("toDate", toDate);
+			Date hanDate = new Date();
+			String han_date = rotation.getHanDate();
+			try {
+				hanDate = sdf.parse(han_date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			model.addAttribute("hanDate", hanDate);
+			model.addAttribute("rotation", rotation);
+		}
+		return "/posrot/rotmanage/form";
+	}
+
+	// 轮岗计划审批
+	@RequestMapping("check")
+	public String check(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("2");// 2.待审核
+		model.addAttribute("sta", rotation.getStatus());
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		return "/posrot/rotmanage/check";
+	}
+
+	// 审批轮岗计划（通过）
+	@ResponseBody
+	@RequestMapping("pass")
+	public Map<String, Object> pass(Rotation rotation, Model model) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Rotation rot = new Rotation();
+		PosLog pLog = new PosLog();
+		if ("1".equals(rotation.getStatus())) {
+			rot.setId(rotation.getId());
+			rot.setStatus("2");// 状态修改为待审批
+			rotationService.updateStatus(rot);
+
+			pLog.setPlanId(rotation.getId());
+			// pLog.setOpeOpinion(rotation.getOpeOpinion());
+			posLogService.insert2(pLog);// 提交计划
+		} else if ("2".equals(rotation.getStatus())) {
+			rot.setId(rotation.getId());
+			if ("1".equals(rotation.getActionCode())) {
+				rot.setStatus("3");// 计划通过
+				rotationService.updateStatus(rot);
+			} else if ("0".equals(rotation.getActionCode())) {
+				// rot.setStatus("9");// 计划不通过
+				rot.setStatus("9");// 计划不通过
+				rot.setRemark("9");// 9.不通过计划,页面判断操作项（list_1.jsp）
+				rotationService.updateStatus(rot);
+			}
+			pLog.setPlanId(rotation.getId());
+			pLog.setActionCode(rotation.getActionCode());
+			pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+			posLogService.insert3(pLog);// 计划审批通过
+		} else if ("3".equals(rotation.getStatus())) {
+			// 轮岗计划通知
+			rot.setId(rotation.getId());
+			rot.setStatus("4");
+			rotationService.updateStatus(rot);
+
+			pLog.setPlanId(rotation.getId());
+			pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+			posLogService.insert4(pLog);
+		} else if ("4".equals(rotation.getStatus())) {
+
+			PosLog log_temp = new PosLog();
+			log_temp.setPlanId(rotation.getId());
+			log_temp.setActionCode("5");
+			log_temp.setOpeUserId(AccountShiroUtil.getCurrentUser().getUserId());
+			List<PosLog> list = posLogService.find(log_temp);
+
+			if (!list.isEmpty()) {
+				String title = "已经接收计划，请等待顶岗人/轮岗人接收！";
+				map.put("title", title);
+			} else {
+				rot.setId(rotation.getId());
+				// 员工接收轮岗/顶岗计划
+				rot.setId(rotation.getId());
+				if ("1".equals(rotation.getActionCode())) {
+					// 通过
+					pLog.setPlanId(rotation.getId());
+					pLog.setActionCode(rotation.getActionCode());
+					pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+					posLogService.insert5(pLog);// 计划审批通过
+				} else if ("0".equals(rotation.getActionCode())) {
+					// 不通过
+					pLog.setPlanId(rotation.getId());
+					pLog.setActionCode(rotation.getActionCode());
+					pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+					posLogService.insert5(pLog);// 计划审批通过
+				}
+				// ------------------------------------------
+				PosLog pLog_temp_1 = new PosLog();
+				pLog_temp_1.setActionCode("5");// 接收
+				pLog_temp_1.setPlanId(rotation.getId());
+				List<PosLog> list_temp_1 = posLogService.find(pLog_temp_1);
+				if (list_temp_1.size() > 1) {
+
+					for (int i = 0; i < list_temp_1.size(); i++) {
+						for (int j = i + 1; j < list_temp_1.size(); j++) {
+							if (list_temp_1.get(i).getOpeUserId().equals(list_temp_1.get(j).getOpeUserId())) {
+								list_temp_1.remove(j);
+							}
+						}
+					}
+					if (list_temp_1.size() > 1) {
+						rot.setId(rotation.getId());
+						rot.setStatus("5");// 计划通过
+						rotationService.updateStatus(rot);
+					}
+
+				}
+
+			}
+		} else if ("5".equals(rotation.getStatus())) {
+
+			PosLog log_temp = new PosLog();
+			log_temp.setPlanId(rotation.getId());
+			log_temp.setActionCode("6");
+			log_temp.setOpeUserId(AccountShiroUtil.getCurrentUser().getUserId());
+			List<PosLog> list = posLogService.find(log_temp);
+
+			if (!list.isEmpty()) {
+				String title = "已经交接计划，请等待顶岗人/轮岗人交接！";
+				map.put("title", title);
+			} else {
+
+				pLog.setPlanId(rotation.getId());
+				pLog.setActionCode(rotation.getActionCode());
+				pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+				posLogService.insert6(pLog);// 计划审批通过
+
+				// ------------------------------------------
+
+				PosLog pLog_temp_5 = new PosLog();
+				pLog_temp_5.setActionCode("6");// 接收
+				pLog_temp_5.setPlanId(rotation.getId());
+				List<PosLog> list_temp_5 = posLogService.find(pLog_temp_5);
+				if (list_temp_5.size() > 1) {
+
+					for (int i = 0; i < list_temp_5.size(); i++) {
+						for (int j = i + 1; j < list_temp_5.size(); j++) {
+							if (list_temp_5.get(i).getOpeUserId().equals(list_temp_5.get(j).getOpeUserId())) {
+								list_temp_5.remove(j);
+							}
+						}
+					}
+					if (list_temp_5.size() > 1) {
+						rot.setId(rotation.getId());
+						rot.setStatus("6");// 计划通过
+						rotationService.updateStatus(rot);
+					}
+
+				}
+				// ------------------------------------------
+			}
+		} else if ("6".equals(rotation.getStatus())) {
+			rot.setId(rotation.getId());
+			pLog.setPlanId(rotation.getId());
+			if ("1".equals(rotation.getActionCode())) {
+				rot.setStatus("7");
+			} else if ("0".equals(rotation.getActionCode())) {
+				rot.setStatus("6");
+			}
+			rotationService.updateStatus(rot);
+			pLog.setActionCode(rotation.getActionCode());
+			pLog.setOpeOpinion(rotation.getOpeOpinion());// 操作意见
+			posLogService.insert7(pLog);// 7.确认计划执行
+		} else if ("7".equals(rotation.getStatus())) {
+			rot.setStatus("8");
+			rot.setId(rotation.getId());
+			rotationService.updateStatus(rot);
+			pLog.setPlanId(rotation.getId());
+			posLogService.insert8(pLog);// 8.计划归档
+
+			// /////////////////////////////////////////
+
+			Rotation rotinfo = new Rotation();
+			rotinfo.setId(rotation.getId());
+			Rotation info = rotationService.find(rotinfo).get(0);
+
+			User user = new User();
+			user.setUserId(info.getRotUserId());
+			User user_info = userService.find(user).get(0);
+
+			/*
+			 * 更新员工履历
+			 */
+
+			ResInfo resInfo = new ResInfo();
+			resInfo.setUserId(info.getRotUserId());
+			resInfo.setPosCode(user_info.getPos());
+			resInfo.setBeginDate(user_info.getPosDate());
+			resInfo.setEndDate(info.getToDate());
+			resInfo.setStatus("1");
+			resInfo.setRemark("");// 备注
+			resInfo.setCreUserId(AccountShiroUtil.getCurrentUser().getUserId());
+			resInfo.setCreDate(DateUtils.getDate().toString());
+			resService.insert(resInfo);
+
+			/*
+			 * 跟新员工信息
+			 */
+
+			// User user = new User();
+			user.setOrgNo(info.getToOrgNo());
+			user.setPos(info.getToPos());
+			user.setPosDate(info.getToDate());
+			//userService.update_pos_info(user);
+
+		}
+		map.put("msg", "success");
+		return map;
+	}
+
+	// 轮岗计划列表(ALL)
+	@RequestMapping("listall")
+	public String listall(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		Page<Rotation> page = rotationService.find_undone(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("statusAll", page.getList().size());
+
+		Rotation rot = new Rotation();
+		rot.setStatus("1");// 待提交（已保存轮岗计划）
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+
+		return "/posrot/rotmanage/list_all";
+	}
+
+	// 待提交 STATUS:1（已保存轮岗计划）
+	@RequestMapping("list1")
+	public String list1(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("1");// 1.待提交
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status1", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_1";
+	}
+
+	// 待审批 STATUS:2（已提交计划）
+	@RequestMapping("list2")
+	public String list2(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("2");// 2.待审批
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status2", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_2";
+	}
+
+	// 待通知 STATUS:3
+	@RequestMapping("list3")
+	public String list3(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("3");// 3.待通知
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status3", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_3";
+	}
+
+	// 待接收 STATUS:4
+	@RequestMapping("list4")
+	public String list4(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("4");// 4.待接收
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status4", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_4";
+	}
+
+	// 待交接 STATUS:5
+	@RequestMapping("list5")
+	public String list5(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("5");// 5.待交接
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status5", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_5";
+	}
+
+	// 待执行 STATUS:6
+	@RequestMapping("list6")
+	public String list6(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("6");// 6.待执行
+		model.addAttribute("sta", rotation.getStatus());
+
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status6", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("7");
+		model.addAttribute("status7", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_6";
+	}
+
+	// 待归档 STATUS:7
+	@RequestMapping("list7")
+	public String list7(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+		// 查询当前登录用户所在的机构的,待审核轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		rotation.setStatus("7");// 7.待归档
+		model.addAttribute("sta", rotation.getStatus());
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		// 全部指定轮岗计划数量
+		model.addAttribute("status7", rotationService.countStatusNum(rotation).get(0).getStatusNum());
+		Rotation rot = new Rotation();
+		model.addAttribute("statusAll", rotationService.countStatusNum(null).get(0).getStatusNum());
+		rot.setStatus("1");
+		model.addAttribute("status1", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("2");
+		model.addAttribute("status2", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("3");
+		model.addAttribute("status3", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("4");
+		model.addAttribute("status4", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("5");
+		model.addAttribute("status5", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		rot.setStatus("6");
+		model.addAttribute("status6", rotationService.countStatusNum(rot).get(0).getStatusNum());
+		return "/posrot/rotmanage/list_7";
+	}
+
+	// 轮岗计划详情
+	@RequestMapping("info")
+	public String info(Rotation rot, Model model) {
+		Rotation rot_temp = new Rotation();
+		rot_temp.setId(rot.getId());
+
+		// 根据ID查询计划
+		Rotation rotation = rotationService.find(rot_temp).get(0);
+
+		// 处理待接收、待交接
+		if (rot.getStatus() != null) {
+			rotation.setStatus(rot.getStatus());
+		}
+
+		model.addAttribute("rotation", rotation);
+		model.addAttribute("sta", rotation.getStatus());
+
+		PosLog pLog = new PosLog();
+		pLog.setPlanId(rotation.getId());
+
+		// 流程日志
+		List<PosLog> list = posLogService.findAllList(pLog);
+		model.addAttribute("list", list);
+
+		return "/posrot/rotmanage/info";
+	}
+
+	// 轮岗计划详情
+	@RequestMapping("urg_info")
+	public String urginfo(Rotation rot, Model model) {
+		Rotation rot_temp = new Rotation();
+		rot_temp.setId(rot.getId());
+
+		Rotation rotation = rotationService.find(rot_temp).get(0);// 根据ID查询计划
+
+		model.addAttribute("rotation", rotation);
+		model.addAttribute("sta", rotation.getStatus());
+
+		PosLog pLog = new PosLog();
+		pLog.setPlanId(rotation.getId());
+
+		List<PosLog> list = posLogService.findAllList(pLog);// 流程日志
+		model.addAttribute("list", list);
+
+		return "/posrot/rotmanage/urg_info";
+	}
+
+	// 轮岗计划详情(all页面)
+	@RequestMapping("all_page_info")
+	public String all_page_info(Rotation rot, Model model) {
+
+		Rotation rot_temp = new Rotation();
+		rot_temp.setId(rot.getId());
+		Rotation rotation = rotationService.find(rot_temp).get(0);// 根据ID查询计划
+		model.addAttribute("rotation", rotation);
+
+		PosLog pLog = new PosLog();
+		pLog.setPlanId(rotation.getId());
+		List<PosLog> list = posLogService.findAllList(pLog);// 流程日志
+		model.addAttribute("list", list);
+
+		return "/posrot/rotmanage/all_info";
+	}
+
+	// 督办
+	@ResponseBody
+	@RequestMapping(value = "urg")
+	public Map<String, Object> urg(Rotation rotation, Model model) {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		PosLog pLog = new PosLog();
+
+		pLog.setPlanId(rotation.getId());
+		pLog.setOpeOpinion(rotation.getOpeOpinion());
+
+		if ("4".equals(rotation.getStatus())) {
+			posLogService.insert9(pLog);// 9.待接收督办
+		} else if ("5".equals(rotation.getStatus())) {
+			posLogService.insert10(pLog);// 10.待交接督办
+		}
+		map.put("msg", "success");
+		return map;
+	}
+
+	// 我的轮岗计划列表
+	@RequestMapping("mypos_list")
+	public String mypos_list(Rotation rotation, Model model) {
+		// 轮岗userID
+		String userID = AccountShiroUtil.getCurrentUser().getUserId();
+
+		Rotation rot = new Rotation();
+		Rotation rep = new Rotation();
+
+		rot.setRotUserId(userID);
+		rep.setRepUserId(userID);
+
+		// 轮岗计划列表
+		List<Rotation> rotlist = rotationService.find_pos(rot);
+		// 轮岗计划列表
+		List<Rotation> replist = rotationService.find_pos(rep);
+
+		List<Rotation> list = new ArrayList<Rotation>();
+		for (int i = 0; i < rotlist.size(); i++) {
+			list.add(rotlist.get(i));
+		}
+
+		for (int i = 0; i < replist.size(); i++) {
+			list.add(replist.get(i));
+		}
+
+		model.addAttribute("sta", rotation.getStatus());
+
+		// =====================================================
+		for (int i = 0; i < list.size(); i++) {
+			;
+			PosLog plog = new PosLog();
+			plog.setPlanId(list.get(i).getId());
+			plog.setOpeUserId(userID);
+			if (list.get(i).getStatus().equals("4")) {// 待接收状态
+				plog.setActionCode("5");
+			} else if (list.get(i).getStatus().equals("5")) {// 待交接状态
+				plog.setActionCode("6");
+			}
+			if (!posLogService.find(plog).isEmpty()) {
+				list.get(i).setStatus("5");
+			}
+		}
+
+		// =====================================================
+		model.addAttribute("poslist", list);
+		// =====================================================
+
+		return "/posrot/rotmanage/mypos_list";
+	}
+
+	// 已归档轮岗计划
+	@RequestMapping("archives")
+	public String archives(Rotation rotation, Model model, HttpServletRequest request, HttpServletResponse response) {
+		// 设置查询条件为已归档
+		rotation.setStatus("8");
+		// 查询条件,岗位
+		List<Pos> posList = posService.findAllList(null);
+		model.addAttribute("posList", posList);
+		// 查询当前登录用户所在的机构的轮岗计划列表
+		rotation.setRotOrgNo(AccountShiroUtil.getCurrentUser().getOrgNo());
+		Page<Rotation> page = rotationService.findByPage(rotation, new Page<Rotation>(request, response));
+		model.addAttribute("page", page);
+		return "/posrot/rotmanage/archives";
+	}
+
+}

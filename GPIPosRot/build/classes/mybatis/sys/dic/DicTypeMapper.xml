@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.DicTypeDao">
+
+	<!-- com.sys.entity.DicType -->
+	<resultMap id="base" type="DicType"></resultMap>
+
+	<select id="findAllList" resultMap="base" parameterType="DicType">
+		select
+			t.*
+		from
+			T_SYS_DIC_TYPE t WHERE 1=1
+	</select>
+	
+	<select id="find" resultMap="base" parameterType="DicType">
+		select
+			t.*
+		from
+			T_SYS_DIC_TYPE t
+		WHERE
+			1=1
+		<if test="typeCode != null and typeCode != '' ">
+			and TYPE_CODE=#{typeCode}
+		</if>
+	</select>
+	
+</mapper>

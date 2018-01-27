@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.RecessDao">
+
+	<resultMap id="base" type="Recess"></resultMap>
+
+	<select id="getKey" resultType="Long" parameterType="Recess">
+		SELECT S_KEY.NEXTVAL FROM DUAL
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Recess">
+		SELECT R.ID,
+		R.RECESS_NO,
+		R.REC_USER_ID,
+		REC_USER.USER_NAME AS REC_USER_NAME,
+		R.REC_ORG_NO,
+		REC_ORG.ORG_NAME AS REC_ORG_NAME,
+		R.REC_POS,
+		REC_POS.POS_NAME
+		AS REC_POS_NAME,
+		R.REC_BEGIN_DATE,
+		R.REC_END_DATE,
+		R.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		R.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		R.REP_POS,
+		REP_POS.POS_NAME AS REP_POS_NAME,
+		R.HAN_DATE,
+		R.CRE_USER_ID,
+		CRE_USER.USER_NAME AS
+		CRE_USER_NAME,
+		R.CRE_DATE,
+		R.STATUS,
+		R.REMARK
+		FROM
+		T_POSROT_RECESS R
+		LEFT JOIN T_SYS_USER_INFO REC_USER
+		ON REC_USER.USER_ID = R.REC_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REC_ORG
+		ON REC_ORG.ORG_NO =
+		R.REC_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO REP_USER
+		ON REP_USER.USER_ID = R.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = R.REP_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO CRE_USER
+		ON CRE_USER.USER_ID =
+		R.CRE_USER_ID
+		LEFT JOIN T_SYS_POSITION_INFO REC_POS
+		ON REC_POS.POS_CODE = R.REC_POS
+		LEFT JOIN
+		T_SYS_POSITION_INFO REP_POS
+		ON REP_POS.POS_CODE = R.REP_POS
+		WHERE 1 = 1
+		<if test="id != null and id != '' ">
+			AND R.ID = #{id}
+		</if>
+		<if test="status != null and status != '' ">
+			AND R.STATUS = #{status}
+		</if>
+		<if test="recUserId != null and recUserId != '' ">
+			AND R.REC_USER_ID = #{recUserId}
+		</if>
+		<if test="repUserId != null and repUserId != '' ">
+			AND R.REP_USER_ID = #{repUserId}
+		</if>
+
+		<if test="tempUserId != null and tempUserId != '' ">
+			AND (R.REP_USER_ID = #{tempUserId} OR R.REC_USER_ID = #{tempUserId})
+		</if>
+
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Recess">
+		SELECT R.ID,
+		R.RECESS_NO,
+		R.REC_USER_ID,
+		REC_USER.USER_NAME AS REC_USER_NAME,
+		R.REC_ORG_NO,
+		REC_ORG.ORG_NAME AS REC_ORG_NAME,
+		REC_ORG.ORG_NAME_2ND,
+		R.REC_POS,
+		REC_POS.POS_NAME
+		AS REC_POS_NAME,
+		R.REC_BEGIN_DATE,
+		R.REC_END_DATE,
+		R.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		R.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		R.REP_POS,
+		REP_POS.POS_NAME AS REP_POS_NAME,
+		R.HAN_DATE,
+		R.CRE_USER_ID,
+		CRE_USER.USER_NAME AS
+		CRE_USER_NAME,
+		R.CRE_DATE,
+		R.STATUS,
+		R.REMARK,
+		ABS(TO_DATE(R.REC_BEGIN_DATE, 'yyyy-mm-dd') -
+		TO_DATE(R.REC_END_DATE, 'yyyy-mm-dd')) AS VACATION_DAY
+		FROM
+		T_POSROT_RECESS R
+		LEFT JOIN T_SYS_USER_INFO REC_USER
+		ON REC_USER.USER_ID = R.REC_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REC_ORG
+		ON REC_ORG.ORG_NO =
+		R.REC_ORG_NO
+		LEFT JOIN
+		T_SYS_USER_INFO REP_USER
+		ON REP_USER.USER_ID = R.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = R.REP_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO CRE_USER
+		ON CRE_USER.USER_ID = R.CRE_USER_ID
+		LEFT
+		JOIN T_SYS_POSITION_INFO REC_POS
+		ON REC_POS.POS_CODE = R.REC_POS
+		LEFT JOIN
+		T_SYS_POSITION_INFO
+		REP_POS
+		ON REP_POS.POS_CODE = R.REP_POS
+		WHERE 1 = 1
+		<if test="id != null and id != '' ">
+			AND R.ID = #{id}
+		</if>
+		<if test="status != null and status != '' ">
+			AND R.STATUS = #{status}
+		</if>
+		<if test="recUserId != null and recUserId != '' ">
+			AND R.REC_USER_ID = #{recUserId}
+		</if>
+		<if test="repUserId != null and repUserId != '' ">
+			AND R.REP_USER_ID = #{repUserId}
+		</if>
+		<if test="tempUserId != null and tempUserId != '' ">
+			AND (R.REP_USER_ID = #{tempUserId} OR R.REC_USER_ID = #{tempUserId})
+		</if>
+		<if test="orgNo != '' and orgNo != null">
+			AND R.REC_ORG_NO = #{orgNo}
+		</if>
+		<if test="recUserName != '' and recUserName != null">
+			AND REC_USER.USER_NAME like '%'||#{recUserName}||'%'
+		</if>
+		<if test="repUserName != '' and repUserName != null">
+			AND REP_USER.USER_NAME like '%'||#{repUserName}||'%'
+		</if>
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="Rotation">
+		SELECT R.ID,
+		R.RECESS_NO,
+		R.REC_USER_ID,
+		REC_USER.USER_NAME AS REC_USER_NAME,
+		R.REC_ORG_NO,
+		REC_ORG.ORG_NAME AS REC_ORG_NAME,
+		R.REC_POS,
+		REC_POS.POS_NAME
+		AS REC_POS_NAME,
+		R.REC_BEGIN_DATE,
+		R.REC_END_DATE,
+		R.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		R.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		R.REP_POS,
+		REP_POS.POS_NAME AS REP_POS_NAME,
+		R.HAN_DATE,
+		R.CRE_USER_ID,
+		CRE_USER.USER_NAME AS
+		CRE_USER_NAME,
+		R.CRE_DATE,
+		R.STATUS,
+		R.REMARK
+		FROM
+		T_POSROT_RECESS R
+		LEFT JOIN T_SYS_USER_INFO REC_USER
+		ON REC_USER.USER_ID = R.REC_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REC_ORG
+		ON REC_ORG.ORG_NO =
+		R.REC_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO REP_USER
+		ON REP_USER.USER_ID = R.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = R.REP_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO CRE_USER
+		ON CRE_USER.USER_ID =
+		R.CRE_USER_ID
+		LEFT JOIN T_SYS_POSITION_INFO REC_POS
+		ON REC_POS.POS_CODE = R.REC_POS
+		LEFT JOIN
+		T_SYS_POSITION_INFO REP_POS
+		ON REP_POS.POS_CODE = R.REP_POS
+		WHERE 1 = 1
+		<if test="param.recOrgNo != null and param.recOrgNo != '' ">
+			AND R.REC_ORG_NO IN
+			(SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.recOrgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+		<if test="param.status != null and param.status != '' ">
+			AND R.STATUS = #{param.status}
+		</if>
+	</select>
+
+	<select id="findNotPass" resultMap="base" parameterType="Rotation">
+		SELECT R.ID,
+		R.RECESS_NO,
+		R.REC_USER_ID,
+		REC_USER.USER_NAME AS REC_USER_NAME,
+		R.REC_ORG_NO,
+		REC_ORG.ORG_NAME AS REC_ORG_NAME,
+		R.REC_POS,
+		REC_POS.POS_NAME
+		AS REC_POS_NAME,
+		R.REC_BEGIN_DATE,
+		R.REC_END_DATE,
+		R.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		R.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		R.REP_POS,
+		REP_POS.POS_NAME AS REP_POS_NAME,
+		R.HAN_DATE,
+		R.CRE_USER_ID,
+		CRE_USER.USER_NAME AS
+		CRE_USER_NAME,
+		R.CRE_DATE,
+		R.STATUS,
+		R.REMARK
+		FROM
+		T_POSROT_RECESS R
+		LEFT JOIN T_SYS_USER_INFO REC_USER
+		ON REC_USER.USER_ID = R.REC_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REC_ORG
+		ON REC_ORG.ORG_NO =
+		R.REC_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO REP_USER
+		ON REP_USER.USER_ID = R.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = R.REP_ORG_NO
+		LEFT JOIN T_SYS_USER_INFO CRE_USER
+		ON CRE_USER.USER_ID =
+		R.CRE_USER_ID
+		LEFT JOIN T_SYS_POSITION_INFO REC_POS
+		ON REC_POS.POS_CODE = R.REC_POS
+		LEFT JOIN
+		T_SYS_POSITION_INFO REP_POS
+		ON REP_POS.POS_CODE = R.REP_POS
+		WHERE 1 = 1
+		AND R.STATUS != '8'
+		<if test="param.recOrgNo != null and param.recOrgNo != '' ">
+			AND R.REC_ORG_NO IN
+			(SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.recOrgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+		<if test="param.status != null and param.status != '' ">
+			AND R.STATUS = #{param.status}
+		</if>
+	</select>
+
+
+	<select id="update" resultMap="base" parameterType="Recess">
+		UPDATE T_POSROT_RECESS
+		SET
+		RECESS_NO = #{recessNo},
+		REC_USER_ID = #{recUserId},
+		REC_ORG_NO =
+		#{recOrgNo},
+		REC_POS = #{recPos},
+		REC_BEGIN_DATE =
+		#{recBeginDate},
+		REC_END_DATE = #{recEndDate},
+		REP_USER_ID = #{repUserId},
+		REP_ORG_NO = #{repOrgNo},
+		REP_POS = #{repPos},
+		HAN_DATE = #{hanDate},
+		CRE_USER_ID = #{creUserId},
+		CRE_DATE = #{creDate},
+		STATUS =
+		#{status},
+		REMARK = #{remark}
+		WHERE ID = #{id}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Recess">
+		INSERT INTO T_POSROT_RECESS (
+		ID,
+		RECESS_NO,
+		REC_USER_ID,
+		REC_ORG_NO,
+		REC_POS,
+		REC_BEGIN_DATE,
+		REC_END_DATE,
+		REP_USER_ID,
+		REP_ORG_NO,
+		REP_POS,
+		HAN_DATE,
+		CRE_USER_ID,
+		CRE_DATE,
+		STATUS,
+		REMARK
+		) VALUES (
+		#{id},
+		#{recessNo},
+		#{recUserId},
+		#{recOrgNo},
+		#{recPos},
+		#{recBeginDate},
+		#{recEndDate},
+		#{repUserId},
+		#{repOrgNo},
+		#{repPos},
+		#{hanDate},
+		#{creUserId},
+		#{creDate},
+		#{status},
+		#{remark}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Recess">
+		DELETE T_POSROT_RECESS WHERE ID = #{id}
+	</select>
+
+	<select id="countStatusNum" resultType="java.lang.Integer" parameterType="Recess">
+		SELECT COUNT(*) FROM
+		(select * from T_POSROT_RECESS T WHERE T.STATUS != 8)
+		WHERE 1=1
+		<if test="status != null and status != '' ">
+			AND STATUS = #{status}
+		</if>
+	</select>
+
+	<select id="updateStatus" resultMap="base" parameterType="Recess">
+		update T_POSROT_RECESS
+		set
+		status = #{status},
+		remark = #{remark}
+		WHERE ID=#{id}
+	</select>
+
+</mapper>

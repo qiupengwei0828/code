@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.RotationDao">
+
+	<resultMap id="base" type="Rotation"></resultMap>
+
+	<select id="getKey" resultType="Long" parameterType="Rotation">
+		SELECT
+		S_KEY.NEXTVAL FROM DUAL
+	</select>
+
+	<select id="countStatusNum" resultMap="base" parameterType="Rotation">
+		SELECT
+		COUNT(*) AS statusNum
+		FROM T_POSROT_ROTATE
+		WHERE 1=1
+		AND STATUS != '8'
+		<if test="status != null and status != '' ">
+			AND STATUS = #{status}
+		</if>
+
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Rotation">
+		SELECT POS.ID,
+		POS.ROTATE_NO,
+		POS.ROT_USER_ID,
+		ROT_USER.USER_NAME AS ROT_USER_NAME,
+		POS.ROT_ORG_NO,
+		ROT_ORG.ORG_NAME AS ROT_ORG_NAME,
+		POS.ROT_POS,
+		POS.TO_POS,
+		TOPOS.POS_NAME AS TO_POS_NAME,
+		POS.TO_ORG_NO,
+		TO_ORG.ORG_NAME AS TO_ORG_NAME,
+		POS.TO_DATE,
+		POS.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		POS.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		POS.REP_POS,
+		POS.HAN_DATE,
+		POS.CRE_USER_ID,
+		POS.CRE_DATE,
+		POS.STATUS,
+		POS.REMARK
+		FROM
+		T_POSROT_ROTATE POS
+		LEFT JOIN
+		T_SYS_USER_INFO
+		ROT_USER ON ROT_USER.USER_ID = POS.ROT_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO ROT_ORG
+		ON
+		ROT_ORG.ORG_NO = POS.ROT_ORG_NO
+		LEFT JOIN
+		T_SYS_USER_INFO REP_USER
+		ON
+		REP_USER.USER_ID = POS.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = POS.REP_ORG_NO
+		LEFT JOIN
+		T_SYS_ORG_INFO TO_ORG
+		ON
+		TO_ORG.ORG_NO = POS.TO_ORG_NO
+		LEFT JOIN T_SYS_POSITION_INFO TOPOS
+		ON
+		TOPOS.POS_CODE = POS.TO_POS
+		WHERE 1 = 1
+		<if test="id != null and id != '' ">
+			AND POS.ID = #{id}
+		</if>
+		<if test="rotUserId != null and rotUserId != '' ">
+			AND POS.ROT_USER_ID = #{rotUserId}
+		</if>
+		<if test="repUserId != null and repUserId != '' ">
+			AND POS.REP_USER_ID = #{repUserId}
+		</if>
+		<if test="status != null and status != '' ">
+			AND POS.STATUS = #{status}
+		</if>
+	</select>
+
+	<select id="find_undone" resultMap="base" parameterType="Rotation">
+		SELECT
+		POS.ID,
+		POS.ROTATE_NO,
+		POS.ROT_USER_ID,
+		ROTUSER.USER_NAME AS ROT_USER_NAME,
+		POS.ROT_ORG_NO,
+		ROTORG.ORG_NAME AS ROT_ORG_NAME,
+		POS.ROT_POS,
+		POS.TO_POS,
+		POS.TO_ORG_NO,
+		TOORG.ORG_NAME AS TO_ORG_NAME,
+		POS.TO_DATE,
+		POS.REP_USER_ID,
+		REPUSER.USER_NAME AS REP_USER_NAME,
+		POS.REP_ORG_NO,
+		REPORG.ORG_NAME AS REP_ORG_NAME,
+		POS.REP_POS,
+		POS.HAN_DATE,
+		POS.CRE_USER_ID,
+		CREUSER.USER_NAME AS CRE_USER_NAME,
+		POS.CRE_DATE,
+		POS.STATUS,
+		POS.REMARK
+		FROM
+		T_POSROT_ROTATE POS
+		LEFT JOIN T_SYS_USER_INFO ROTUSER
+		ON ROTUSER.USER_ID = POS.ROT_USER_ID
+		LEFT JOIN T_SYS_USER_INFO REPUSER
+		ON REPUSER.USER_ID =
+		POS.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO TOORG
+		ON TOORG.ORG_NO = POS.TO_ORG_NO
+		LEFT JOIN T_SYS_ORG_INFO ROTORG
+		ON ROTORG.ORG_NO = POS.ROT_ORG_NO
+		LEFT
+		JOIN T_SYS_ORG_INFO REPORG
+		ON REPORG.ORG_NO = POS.REP_ORG_NO
+		LEFT JOIN
+		T_SYS_USER_INFO CREUSER
+		ON CREUSER.USER_ID = POS.CRE_USER_ID
+		WHERE 1=1
+		AND POS.STATUS != 8
+		<if test="param.rotOrgNo != null and param.rotOrgNo != '' ">
+			AND POS.ROT_ORG_NO IN (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.rotOrgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+
+		<if test="param.rotateNo != null and param.rotateNo != '' ">
+			AND POS.ROTATE_NO = #{param.rotateNo}
+		</if>
+
+		<if test="param.rotUserName != null and param.rotUserName != '' ">
+			AND ROTUSER.USER_NAME like '%'||#{param.rotUserName}||'%'
+		</if>
+
+		<if test="param.rotPos != null and param.rotPos != '' ">
+			AND POS.ROT_POS = #{param.rotPos}
+		</if>
+
+		<if test="param.repUserName != null and param.repUserName != '' ">
+			AND REPUSER.USER_NAME like '%'||#{param.repUserName}||'%'
+		</if>
+
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="Rotation">
+		SELECT
+		POS.ID,
+		POS.ROTATE_NO,
+		POS.ROT_USER_ID,
+		ROTUSER.USER_NAME AS ROT_USER_NAME,
+		POS.ROT_ORG_NO,
+		ROTORG.ORG_NAME AS ROT_ORG_NAME,
+		POS.ROT_POS,
+		POS.TO_POS,
+		POS.TO_ORG_NO,
+		TOORG.ORG_NAME AS TO_ORG_NAME,
+		POS.TO_DATE,
+		POS.REP_USER_ID,
+		REPUSER.USER_NAME AS REP_USER_NAME,
+		POS.REP_ORG_NO,
+		REPORG.ORG_NAME AS REP_ORG_NAME,
+		POS.REP_POS,
+		POS.HAN_DATE,
+		POS.CRE_USER_ID,
+		CREUSER.USER_NAME AS CRE_USER_NAME,
+		POS.CRE_DATE,
+		POS.STATUS,
+		POS.REMARK
+		FROM
+		T_POSROT_ROTATE POS
+		LEFT JOIN T_SYS_USER_INFO ROTUSER
+		ON ROTUSER.USER_ID = POS.ROT_USER_ID
+		LEFT JOIN T_SYS_USER_INFO REPUSER
+		ON REPUSER.USER_ID =
+		POS.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO TOORG
+		ON TOORG.ORG_NO = POS.TO_ORG_NO
+		LEFT JOIN T_SYS_ORG_INFO ROTORG
+		ON ROTORG.ORG_NO = POS.ROT_ORG_NO
+		LEFT
+		JOIN T_SYS_ORG_INFO REPORG
+		ON REPORG.ORG_NO = POS.REP_ORG_NO
+		LEFT JOIN
+		T_SYS_USER_INFO CREUSER
+		ON CREUSER.USER_ID = POS.CRE_USER_ID
+		WHERE 1=1
+		<if test="param.rotOrgNo != null and param.rotOrgNo != '' ">
+			AND POS.ROT_ORG_NO IN (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.rotOrgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+
+		<if test="param.status != null and param.status != '' ">
+			AND POS.STATUS = #{param.status}
+		</if>
+
+		<if test="param.rotateNo != null and param.rotateNo != '' ">
+			AND POS.ROTATE_NO = #{param.rotateNo}
+		</if>
+
+		<if test="param.rotUserName != null and param.rotUserName != '' ">
+			AND ROTUSER.USER_NAME like '%'||#{param.rotUserName}||'%'
+		</if>
+
+		<if test="param.rotPos != null and param.rotPos != '' ">
+			AND POS.ROT_POS = #{param.rotPos}
+		</if>
+
+		<if test="param.repUserName != null and param.repUserName != '' ">
+			AND REPUSER.USER_NAME like '%'||#{param.repUserName}||'%'
+		</if>
+
+	</select>
+
+	<select id="find_pos" resultMap="base" parameterType="Rotation">
+		SELECT POS.ID,
+		POS.ROTATE_NO,
+		POS.ROT_USER_ID,
+		ROT_USER.USER_NAME AS ROT_USER_NAME,
+		POS.ROT_ORG_NO,
+		ROT_ORG.ORG_NAME AS ROT_ORG_NAME,
+		POS.ROT_POS,
+		POS.TO_POS,
+		POS.TO_ORG_NO,
+		TO_ORG.ORG_NAME AS TO_ORG_NAME,
+		POS.TO_DATE,
+		POS.REP_USER_ID,
+		REP_USER.USER_NAME AS REP_USER_NAME,
+		POS.REP_ORG_NO,
+		REP_ORG.ORG_NAME AS REP_ORG_NAME,
+		POS.REP_POS,
+		POS.HAN_DATE,
+		POS.CRE_USER_ID,
+		POS.CRE_DATE,
+		POS.STATUS,
+		POS.REMARK
+		FROM
+		T_POSROT_ROTATE POS
+		LEFT JOIN
+		T_SYS_USER_INFO
+		ROT_USER ON ROT_USER.USER_ID = POS.ROT_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO ROT_ORG
+		ON ROT_ORG.ORG_NO = POS.ROT_ORG_NO
+		LEFT JOIN
+		T_SYS_USER_INFO REP_USER
+		ON
+		REP_USER.USER_ID = POS.REP_USER_ID
+		LEFT JOIN T_SYS_ORG_INFO REP_ORG
+		ON REP_ORG.ORG_NO = POS.REP_ORG_NO
+		LEFT JOIN
+		T_SYS_ORG_INFO TO_ORG
+		ON
+		TO_ORG.ORG_NO
+		= POS.TO_ORG_NO
+		WHERE 1 = 1
+		AND POS.STATUS IN ('4','5')
+		<if test="id != null and id != '' ">
+			AND POS.ID = #{id}
+		</if>
+		<if test="rotUserId != null and rotUserId != '' ">
+			AND POS.ROT_USER_ID = #{rotUserId}
+		</if>
+		<if test="repUserId != null and repUserId != '' ">
+			AND POS.REP_USER_ID = #{repUserId}
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Rotation">
+		INSERT INTO T_POSROT_ROTATE
+		(ID,
+		ROTATE_NO,
+		ROT_USER_ID,
+		ROT_ORG_NO,
+		ROT_POS,
+		TO_POS,
+		TO_ORG_NO,
+		TO_DATE,
+		REP_USER_ID,
+		REP_ORG_NO,
+		REP_POS,
+		HAN_DATE,
+		CRE_USER_ID,
+		CRE_DATE,
+		STATUS,
+		REMARK)
+		VALUES
+		( #{id},
+		(select to_char(sysdate, 'yyyy') from dual) ||
+		to_char(s_key.nextval),
+		#{rotUserId},
+		#{rotOrgNo},
+		#{rotPos},
+		#{toPos},
+		#{toOrgNo},
+		#{toDate},
+		#{repUserId},
+		#{repOrgNo},
+		#{repPos},
+		#{hanDate},
+		#{creUserId},
+		#{creDate},
+		#{status},
+		#{remark})
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Rotation">
+		DELETE FROM T_POSROT_ROTATE WHERE 1=1
+		AND ID = #{id}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="Rotation">
+		UPDATE t_posrot_rotate
+		SET
+		ROT_USER_ID=#{rotUserId},
+		ROT_ORG_NO=#{rotOrgNo},
+		ROT_POS=#{rotPos},
+		TO_POS=#{toPos},
+		TO_ORG_NO=#{toOrgNo},
+		TO_DATE=#{toDate},
+		REP_USER_ID=#{repUserId},
+		REP_ORG_NO=#{repOrgNo},
+		REP_POS=#{repPos},
+		HAN_DATE=#{hanDate},
+		CRE_USER_ID=#{creUserId},
+		CRE_DATE=#{creDate},
+		STATUS=#{status},
+		REMARK=#{remark}
+		WHERE ID=#{id}
+	</select>
+
+	<select id="updateStatus" resultMap="base" parameterType="Rotation">
+		update T_POSROT_ROTATE
+		set
+		status = #{status},
+		remark = #{remark}
+		WHERE ID=#{id}
+	</select>
+
+</mapper>

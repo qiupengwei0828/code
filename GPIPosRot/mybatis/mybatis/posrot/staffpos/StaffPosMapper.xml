@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.StaffPosDao">
+
+	<resultMap id="base" type="StaffPos"></resultMap>
+
+	<select id="findAllList" resultMap="base" parameterType="StaffPos">
+		SELECT *
+		FROM T_SYS_POSITION_INFO WHERE 1=1
+		ORDER BY POS_CODE
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="StaffPos">
+		SELECT *
+		FROM T_SYS_POSITION_INFO WHERE 1=1
+		<if test="param.posName!= null and param.posName != '' ">
+			AND POS_NAME like '%'||#{param.posName}||'%'
+		</if>
+		<if test="param.orgLevel!= null and param.orgLevel != '' ">
+			AND ORG_LEVEL = #{param.orgLevel}
+		</if>
+		<if test="param.primary != null and param.primary != '' ">
+			AND PRIMARY = #{param.primary}
+		</if>
+		<if test="param.status != null and param.status != '' ">
+			AND STATUS = #{param.status}
+		</if>
+		ORDER BY POS_CODE
+	</select>
+
+	<select id="find" resultMap="base" parameterType="StaffPos">
+		SELECT *
+		FROM T_SYS_POSITION_INFO WHERE 1=1
+		<if test="id != null and id != '' ">
+			AND ID=#{id}
+		</if>
+		<if test="primary != null and primary != '' ">
+			AND PRIMARY = #{primary}
+		</if>
+	</select>
+
+	<select id="update" resultMap="base" parameterType="StaffPos">
+		UPDATE
+		T_SYS_POSITION_INFO
+		SET
+		POS_CODE=#{posCode},
+		POS_NAME=#{posName},
+		ORG_LEVEL=#{orgLevel},
+		DUTY=#{duty},
+		PRIMARY=#{primary},
+		LIMIT_DATE=#{limitDate},
+		REMARK=#{remark},
+		STATUS=#{status}
+		WHERE 1=1
+		AND
+		ID=#{id}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="StaffPos">
+		INSERT INTO
+		T_SYS_POSITION_INFO VALUES(s_key.nextval,
+		#{posCode},
+		#{posName},
+		#{orgLevel},
+		#{duty},
+		#{primary},
+		#{limitDate},
+		#{remark},
+		#{status}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="StaffPos">
+		DELETE
+		T_SYS_POSITION_INFO WHERE 1=1 AND ID=#{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.ResDao">
+
+	<resultMap id="base" type="ResInfo"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="ResInfo">
+		SELECT R.*, U.USER_NAME
+		FROM T_POSROT_RES_INFO R
+		LEFT JOIN T_SYS_USER_INFO U
+		ON U.USER_ID = R.USER_ID
+		WHERE 1 = 1
+		<if test="userId != null and userId != '' ">
+			AND R.USER_ID = #{userId}
+		</if>
+		<if test="id != null and id != '' ">
+			AND R.ID = #{id}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="ResInfo">
+		SELECT
+		R.*,
+		U.USER_NAME
+		FROM T_POSROT_RES_INFO R
+		LEFT JOIN T_SYS_USER_INFO U
+		ON U.USER_ID = R.USER_ID
+		WHERE 1 = 1
+		<if test="userId != null and userId != '' ">
+			AND R.USER_ID = #{userId}
+		</if>
+	</select>
+
+	<select id="update" resultMap="base" parameterType="ResInfo">
+		UPDATE
+		T_POSROT_RES_INFO
+		SET
+		POS_CODE = #{posCode},
+		BEGIN_DATE = #{beginDate},
+		END_DATE =
+		#{endDate},
+		STATUS = #{status},
+		REMARK = #{remark},
+		CRE_USER_ID = #{creUserId},
+		CRE_DATE = #{creDate}
+		WHERE 1=1
+		AND ID = #{id}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="ResInfo">
+		INSERT INTO
+		T_POSROT_RES_INFO VALUES(
+		s_key.nextval,
+		#{userId},
+		#{posCode},
+		#{beginDate},
+		#{endDate},
+		#{status},
+		#{remark},
+		#{creUserId},
+		#{creDate}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="ResInfo">
+		DELETE
+		T_POSROT_RES_INFO
+		WHERE 1=1
+		AND ID = #{id}
+	</select>
+
+</mapper>

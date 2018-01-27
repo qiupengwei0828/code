@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.PosLogDao">
+
+	<resultMap id="base" type="PosLog"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="PosLog">
+		SELECT * FROM T_POSROT_LOG T
+		WHERE 1=1
+		<if test="planId != null and planId != '' ">
+			AND T.PLAN_ID = #{planId}
+		</if>
+		<if test="actionCode != null and actionCode != '' ">
+			AND T.ACTION_CODE = #{actionCode}
+		</if>
+		<if test="opeUserId != null and opeUserId != '' ">
+			AND T.OPE_USER_ID = #{opeUserId}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="PosLog">
+		SELECT * FROM T_POSROT_LOG T
+		WHERE 1=1
+		<if test="planId != null and planId != '' ">
+			AND T.PLAN_ID = #{planId}
+			ORDER BY ACTION_CODE
+		</if>
+	</select>
+
+	<select id="eInsert" resultMap="base" parameterType="PosLog">
+		INSERT INTO T_POSROT_LOG (
+		ID,
+		PRO_CODE,
+		PRO_NAME,
+		PLAN_ID,
+		ACTION_CODE,
+		ACTION_NAME,
+		OPE_OPINION,
+		OPE_CONTENT,
+		OPE_RESULT,
+		OPE_USER_ID,
+		OPE_USER_NAME,
+		OPE_DATE
+		)
+		VALUES
+		(s_key.nextval,
+		#{proCode},
+		#{proName},
+		#{planId},
+		#{actionCode},
+		#{actionName},
+		#{opeOpinion},
+		#{opeContent},
+		#{opeResult},
+		#{opeUserId},
+		#{opeUserName},
+		#{opeDate}
+		)
+	</select>
+	<select id="insert" resultMap="base" parameterType="PosLog">
+		INSERT INTO T_POSROT_LOG (
+		ID,
+		PRO_CODE,
+		PRO_NAME,
+		PLAN_ID,
+		ACTION_CODE,
+		ACTION_NAME,
+		OPE_OPINION,
+		OPE_CONTENT,
+		OPE_RESULT,
+		OPE_USER_ID,
+		OPE_USER_NAME,
+		OPE_DATE
+		)
+		VALUES
+		(s_key.nextval,
+		#{proCode},
+		#{proName},
+		#{planId},
+		#{actionCode},
+		#{actionName},
+		#{opeOpinion},
+		#{opeContent},
+		#{opeResult},
+		#{opeUserId},
+		#{opeUserName},
+		#{opeDate}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="PosLog">
+		DELETE FROM T_POSROT_LOG T WHERE 1=1
+		<if test="id != null and id != '' ">
+			AND T.ID = #{id}
+		</if>
+		<if test="planId != null and planId != '' ">
+			AND T.PLAN_ID = #{planId}
+		</if>
+		<if test="actionCode != null and actionCode != '' ">
+			AND T.ACTION_CODE  = #{actionCode}
+		</if>
+	</select>
+
+</mapper>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.ResDao">
+
+	<resultMap id="base" type="ResInfo"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="ResInfo">
+		SELECT R.*, U.USER_NAME, O.ORG_NO, O.ORG_NAME
+		FROM T_POSROT_RES_INFO R
+		LEFT JOIN T_SYS_USER_INFO U
+		ON U.USER_ID = R.USER_ID
+		LEFT JOIN T_SYS_ORG_INFO O
+		ON O.ORG_NO = R.ORG_NO
+		WHERE 1 = 1
+		<if test="userId != null and userId != '' ">
+			AND R.USER_ID = #{userId}
+		</if>
+		<if test="id != null and id != '' ">
+			AND R.ID = #{id}
+		</if>
+		<if test="status != null and status != '' ">
+			AND R.STATUS = #{status}
+		</if>
+		ORDER BY R.BEGIN_DATE
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="ResInfo">
+		<![CDATA[
+		SELECT
+		    O.ORG_NAME,
+		    R.ID,
+		    R.USER_ID,
+		    R.POS_CODE,
+		    OLDP.POS_NAME AS POS_NAME,
+		    R.BEGIN_DATE,
+		    R.END_DATE,
+			R.ORG_NO,
+		    R.STATUS,
+		    R.REMARK,
+		    R.CRE_USER_ID,
+		    R.CRE_DATE,
+		    U.USER_NAME,
+		    NOWP.POS_NAME AS NOW_POS_NAME
+		FROM T_POSROT_RES_INFO R
+		LEFT JOIN T_SYS_USER_INFO U
+		    ON U.USER_ID = R.USER_ID
+		LEFT JOIN T_SYS_POSITION_INFO NOWP
+		    ON NOWP.POS_CODE = U.POS
+		LEFT JOIN T_SYS_POSITION_INFO OLDP
+		    ON OLDP.POS_CODE = R.POS_CODE
+		LEFT JOIN T_SYS_ORG_INFO O
+		    ON O.ORG_NO = U.ORG_NO
+		WHERE 1 = 1
+		]]>
+		<if test="userId != null and userId != '' ">
+			AND R.USER_ID = #{userId}
+		</if>
+		<if test="userName != null and userName != '' ">
+			AND U.USER_NAME like '%'||#{userName}||'%'
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			AND R.ORG_NO = #{orgNo}
+		</if>
+		<if test="pos != null and pos != '' ">
+			AND R.POS_CODE = #{pos}
+		</if>
+	</select>
+
+	<select id="update" resultMap="base" parameterType="ResInfo">
+		UPDATE
+		T_POSROT_RES_INFO
+		SET
+		POS_CODE = #{posCode},
+		BEGIN_DATE = #{beginDate},
+		END_DATE = #{endDate},
+		ORG_NO = #{orgNo},
+		STATUS = #{status},
+		REMARK =
+		#{remark},
+		CRE_USER_ID = #{creUserId},
+		CRE_DATE = #{creDate}
+		WHERE 1=1
+		AND ID = #{id}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="ResInfo">
+		INSERT INTO T_POSROT_RES_INFO
+		(ID,
+		BEGIN_DATE,
+		END_DATE,
+		USER_ID,
+		ORG_NO,
+		POS_CODE,
+		STATUS,
+		REMARK,
+		CRE_USER_ID,
+		CRE_DATE)
+		VALUES
+		(
+		s_key.nextval,
+		#{beginDate},
+		#{endDate},
+		#{userId},
+		#{orgNo},
+		#{posCode},
+		#{status},
+		#{remark},
+		#{creUserId},
+		#{creDate}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="ResInfo">
+		DELETE
+		T_POSROT_RES_INFO
+		WHERE 1=1
+		AND ID = #{id}
+	</select>
+
+</mapper>

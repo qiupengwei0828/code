@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.RoleMenuDao">
+
+	<!-- com.sys.entity.Role -->
+	<resultMap id="base" type="RoleMenu"></resultMap>
+	
+	<select id="insert" resultMap="base" parameterType="RoleMenu">
+		INSERT INTO
+			 T_SYS_ROLE_MENU (
+				ID,
+			    ROLE_CODE,
+				MENU_ID
+				)
+			values(
+				s_key.nextval,
+				#{roleCode},
+				#{menuId}
+			)
+	</select>
+	
+	<select id="delete" resultMap="base" parameterType="RoleMenu">
+		DELETE FROM
+			T_SYS_ROLE_MENU
+		where
+			Role_CODE = #{roleCode}
+	</select>
+
+	
+</mapper>

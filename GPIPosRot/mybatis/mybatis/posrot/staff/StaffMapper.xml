@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.posrot.dao.StaffDao">
+
+	<resultMap id="base" type="Staff"></resultMap>
+
+	<select id="findFormatByLoginName" resultMap="base" parameterType="String">
+		SELECT a.* FROM T_SYS_USER_INFO a
+		WHERE 1=1 AND a.user_Id=#{userId}
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Staff">
+		SELECT
+		t.*
+		FROM
+		T_SYS_USER_INFO t
+		where
+		1 = 1
+		<if test="userId != null and userId != '' ">
+			and USER_ID=#{userId}
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			and ORG_NO=#{orgNo}
+		</if>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Staff">
+		SELECT t.*,o.org_name
+		FROM T_SYS_USER_INFO t
+		left join
+		t_sys_org_info o
+		on
+		t.org_no=o.org_no
+		where 1 = 1
+		<if test="userName!= null and userName != '' ">
+			AND t.user_name like '%'||#{userName}||'%'
+		</if>
+		<if test="tel!= null and tel != '' ">
+			AND t.tel= #{tel}
+		</if>
+		<if test="status!= null and status != '' ">
+			AND t.status=#{status}
+		</if>
+		<if test="userId!= null and userId != '' ">
+			AND user_id=#{userId}
+		</if>
+	</select>
+
+	<select id="findByPage" resultMap="base" parameterType="Staff">
+		SELECT t.*,o.org_name,p.pos_name
+		FROM T_SYS_USER_INFO t
+		left join
+		t_sys_org_info o
+		on
+		t.org_no=o.org_no
+		left join
+		t_sys_position_info p
+		on
+		t.pos=p.pos_code
+		where 1 = 1
+		and t.org_no in (select o.org_no
+		from
+		t_sys_org_info o
+		connect by prior o.org_no = o.p_org_no
+		start with
+		o.org_no
+		=#{param.orgNo})
+		and
+		p.primary='1'
+		<if test="param.userName!= null and param.userName != '' ">
+			AND t.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.posName!= null and param.posName != '' ">
+			AND p.pos_name like '%'||#{param.posName}||'%'
+		</if>
+		<if test="param.hrNo!= null and param.hrNo != '' ">
+			AND t.hr_no like '%'||#{param.hrNo}||'%'
+		</if>
+	</select>
+
+	<select id="findExchangePos" resultMap="base" parameterType="Staff">
+		select tt.*,
+		decode(sign(tt.limit_day),
+		-1,
+		to_char(abs(tt.limit_day)),
+		1,
+		'+' || abs(tt.limit_day)) limit_day_disp
+		from (select u.user_id,
+		u.user_name,
+		u.hr_no,
+		u.pos,
+		t.pos_code,
+		t.pos_name,
+		t.limit_date,
+		u.pos_date,
+		o.org_name,
+		ceil(((sysdate - add_months(to_date(u.pos_date, 'yyyy-mm-dd'),
+		t.limit_date *
+		12)))) limit_day
+		from t_sys_user_info u
+		left join t_sys_position_info t
+		on u.pos = t.pos_code
+		left join
+		t_sys_org_info o
+		on u.org_no = o.org_no
+		where
+		u.pos_date is not null
+		and t.primary = '1'
+		and u.org_no in (select o.org_no
+		from t_sys_org_info o
+		connect by prior o.org_no = o.p_org_no
+		start with
+		o.org_no =
+		#{param.orgNo})
+		<if test="param.posCode != null and param.posCode != '' ">
+			AND t.pos_code = #{param.posCode}
+		</if>
+		<if test="param.userName != null and param.userName != '' ">
+			AND u.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.hrNo != null and param.hrNo != '' ">
+			AND u.HR_NO=#{param.hrNo}
+		</if>
+		<if test="param.posDate != null and param.posDate != '' ">
+			AND u.POS_DATE=#{param.posDate}
+		</if>
+		) tt
+		order by tt.limit_day desc
+	</select>
+
+	<!-- <select id="findFurlough" resultMap="base" parameterType="Staff"> select tt.*, decode(sign(tt.limit_day), -1, '+'||abs(tt.limit_day), 1, tt.limit_day) limit_day_disp from (select u.user_id, u.user_name, 
+		t.pos_code, t.pos_name, t.limit_date, u.pos_date, ceil(((sysdate - add_months(to_date(u.pos_date, 'yyyy-mm-dd'), t.limit_date * 12)))) limit_day from t_sys_user_info u left join t_sys_position_info t on 
+		u.pos = t.pos_code left join t_sys_org_info o on u.org_no = o.org_no where u.pos_date is not null and t.primary='1' and u.org_no in (select o.org_no from t_sys_org_info o connect by prior o.org_no = o.p_org_no 
+		start with o.org_no =#{param.orgNo}) <if test="param.posName!= null and param.posName != '' "> AND t.pos_name like '%'||#{param.posName}||'%' </if> <if test="param.orgLevel!= null and param.orgLevel != 
+		'' "> AND o.org_level like '%'||#{param.orgLevel}||'%' </if> <if test="param.status!= null and param.status != '' "> AND t.status=#{param.status} </if> ) tt order by tt.limit_date desc </select> -->
+</mapper>
