@@ -1,0 +1,14 @@
+项目源代码目录：
+
+1.为了避免项目配置文件混乱，SVN目录中去掉了.project、.classpath、.settings项目配置文件，
+  没有MyEclipse项目配置文件.project、.classpath、.settings的，从MyEclipsea项目配置文件下复制，解压后放到对应的项目下，
+  然后再根据自己的系统配置相应的项目环境变量；
+
+2.需要引入的目录
+  GPISys下的base、sys、mybatis
+  GPISys/WebContent下的static;
+  GPISys/WebContent/WEB-INF/下的lib;
+  GPISys/WebContent/WEB-INF/views/下的sys
+
+3.引入方法参考Doc\X2_开发注意事项\1-MyEclipse引用GPI项目内容的方法.docx
+  

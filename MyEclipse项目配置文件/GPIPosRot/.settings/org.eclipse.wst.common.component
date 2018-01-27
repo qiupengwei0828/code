@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="GPIPosRot">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/resources"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/mybatis"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/GPISYS_MYBATIS"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/GPISYS_SYS"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/GPISYS_BASE"/>
+        <property name="java-output-path" value="/GPIPosRot/build/classes"/>
+        <property name="context-root" value="GPIPosRot"/>
+    </wb-module>
+</project-modules>
