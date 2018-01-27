@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.CourtCheckWsinfoDao">
+	<resultMap id="base" type="com.sfxc.entity.CourtCheckWsinfo"></resultMap>
+	<select id="insert" resultMap="base" parameterType="com.sfxc.entity.CourtCheckWsinfo">
+		INSERT INTO
+		COURT_CHECK_WSINFO(
+	      KEYID,    
+		  XH, 
+		  WJMC,
+		  WJLX,
+		  FILEPATH,
+		  QUERY_ID		    				
+		)
+		values(
+		s_key.nextval,
+		#{xh},
+		#{wjmc},
+		#{wjlx},
+		#{filepath},
+		#{queryId}
+		)		
+	</select>
+	<select id="findByPage" resultMap="base" parameterType="com.sfxc.entity.CourtCheckWsinfo">
+		SELECT t.* FROM  COURT_CHECK_WSINFO t WHERE 1=1 and t.QUERY_ID=#{param.queryId}
+	</select>	
+</mapper>

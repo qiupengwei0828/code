@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProResultPosxxDao">
+  <resultMap id="base" type="com.sfxc.entity.ProResultPosxx">
+  </resultMap>
+  
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProResultPosxx">
+    insert into PRO_RESULT_POSXX (KEYID, BDHM, POSXH, 
+      SH, KHZH, DLDZ, TXFS, 
+      TXSJ, HM, FKSJ, PROVIDER, 
+      PROVIDETIME)
+    values (s_key.nextval, #{bdhm}, #{posxh}, 
+      #{sh}, #{khzh}, #{dldz}, #{txfs}, 
+      #{txsj}, #{hm}, #{fksj}, #{fksj}, 
+      #{providetime})
+  </select>
+  <select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.ProResultPosxx">
+		SELECT t.* FROM PRO_RESULT_POSXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="keyid!=null and keyid!='' ">
+		and keyid=#{keyid}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.ProResultPosxx">
+		update  PRO_RESULT_POSXX 
+		set POSXH=#{posxh},SH=#{sh},KHZH=#{khzh},DLDZ=#{dldz},TXFS=#{txfs},TXSJ=#{txsj},
+		HM=#{hm},FKSJ=#{fksj},PROVIDER=#{fksj},PROVIDETIME=#{providetime}
+		where keyid=#{keyid}
+ </select>
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.ProResultPosxx">
+		delete  PRO_RESULT_POSXX 
+		where keyid=#{keyid}
+ </select>	
+</mapper>

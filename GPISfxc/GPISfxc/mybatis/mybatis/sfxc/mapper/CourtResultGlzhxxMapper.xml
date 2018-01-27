@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.CourtResultGlzhxxDao">
+  <resultMap id="base" type="com.sfxc.entity.CourtResultGlzhxx">
+  </resultMap>
+ 
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.CourtResultGlzhxx">
+    insert into COURT_RESULT_GLZHXX (ID, BDHM, CCXH, 
+      GLXH, GLZHLB, GLZHHM, 
+      GLZHMC, PROVIDER, PROVIDETIME
+      )
+    values (s_key.nextval, #{bdhm}, #{ccxh}, 
+      #{glxh}, #{glzhlb}, #{glzhhm}, 
+      #{glzhmc}, #{provider}, #{providetime}
+      )
+  </select>
+<select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.CourtResultGlzhxx">
+		SELECT t.* FROM COURT_RESULT_GLZHXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="id!=null and id!='' ">
+		and id=#{id}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.CourtResultGlzhxx">
+		update  COURT_RESULT_GLZHXX 
+		set CCXH=#{ccxh},GLXH=#{glxh},GLZHLB=#{glzhlb},GLZHHM=#{glzhhm},GLZHMC=#{glzhmc},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where id=#{id}
+ </select>	
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.CourtResultGlzhxx">
+		delete  COURT_RESULT_GLZHXX 
+		where id=#{id}
+ </select>	
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.CourtQueryInfoDao">
+	<resultMap id="base" type="com.sfxc.entity.CourtQueryInfo"></resultMap>
+	<select id="findByPage" resultMap="base" parameterType="com.sfxc.entity.CourtQueryInfo">
+		 SELECT t.query_id,
+        decode(t.bank_type,'null','',t.bank_type)bank_type,
+        decode(t.query_qu,'null','',t.query_qu)query_qu,
+        decode(t.query_name,'null','',t.query_name)query_name,
+        decode(t.nation_area,'null','',t.nation_area)nation_area,
+        decode(t.cert_type,'null','',t.cert_type)cert_type,
+        decode(t.cert_no,'null','',t.cert_no)cert_no,
+        decode(t.ISSUCTF_AHR_LO,'null','',t.ISSUCTF_AHR_LO)ISSUCTF_AHR_LO,
+        decode(t.COURT_NAME,'null','',t.COURT_NAME)COURT_NAME,
+        decode(t.JUDGE_NAME,'null','',t.JUDGE_NAME)JUDGE_NAME,
+        decode(t.case_id,'null','',t.case_id)case_id,
+        decode(t.start_dt,'null','',t.start_dt)start_dt,
+        decode(t.end_dt,'null','',t.end_dt)end_dt FROM COURT_QUERY_INFO t,COURT_DEAL_INFO tt WHERE 1=1 
+		and t.query_id=tt.bdhm 
+        <if test="param.status==3">
+		and (tt.dealstaus='1' or tt.dealstaus='-1')
+		</if>
+		<if test="param.status!=3">
+		and tt.dealstaus=#{param.status}
+		</if>
+		<if test="param.judgeName!=null and param.judgeName!=''">
+		AND JUDGE_NAME=#{param.judgeName}
+		</if>
+		<if test="param.queryName!=null and param.queryName!=''">
+		and QUERY_NAME=#{param.queryName}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.sfxc.entity.CourtQueryInfo">
+		INSERT INTO
+		COURT_QUERY_INFO(
+	      QUERY_ID,    
+		  BANK_TYPE, 
+		  QUERY_QU,      
+		  QUERY_NAME,
+		  NATION_AREA,   
+		  CERT_TYPE,   
+		  CERT_NO,     
+		  ISSUCTF_AHR_LO,
+		  COURT_NAME,
+		  JUDGE_NAME,
+		  CASE_ID,
+		  START_DT,
+		  END_DT 				
+		)
+		values(
+		#{queryId},
+		#{bankType},
+		#{queryQu},
+		#{queryName},
+		#{nationArea},
+		#{certType},
+		#{certNo},
+		#{issuctfAhrLo},
+		#{courtName},
+		#{judgeName},
+		#{caseId},	
+		#{startDt},
+		#{endDt}
+		)		
+	</select>
+	<select id="find" resultMap="base" parameterType="com.sfxc.entity.CourtQueryInfo">
+		SELECT t.query_id,
+        decode(t.bank_type,'null','',t.bank_type)bank_type,
+        decode(t.query_qu,'null','',t.query_qu)query_qu,
+        decode(t.query_name,'null','',t.query_name)query_name,
+        decode(t.nation_area,'null','',t.nation_area)nation_area,
+        decode(t.cert_type,'null','',t.cert_type)cert_type,
+        decode(t.cert_no,'null','',t.cert_no)cert_no,
+        decode(t.ISSUCTF_AHR_LO,'null','',t.ISSUCTF_AHR_LO)ISSUCTF_AHR_LO,
+        decode(t.COURT_NAME,'null','',t.COURT_NAME)COURT_NAME,
+        decode(t.JUDGE_NAME,'null','',t.JUDGE_NAME)JUDGE_NAME,
+        decode(t.case_id,'null','',t.case_id)case_id,
+        decode(t.start_dt,'null','',t.start_dt)start_dt,
+        decode(t.end_dt,'null','',t.end_dt)end_dt,tt.remark FROM COURT_QUERY_INFO t,COURT_DEAL_INFO tt WHERE 1=1 
+		and t.query_id=tt.bdhm
+		and t.QUERY_ID=#{queryId}
+	</select>	
+</mapper>

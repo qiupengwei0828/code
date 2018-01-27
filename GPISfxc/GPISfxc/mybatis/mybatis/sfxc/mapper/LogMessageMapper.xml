@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.LogMessageDao">
+  <resultMap id="base" type="com.sfxc.entity.LogMessage">
+  
+  </resultMap>
+ 
+  <select id="findByPage" resultMap="base"  parameterType="com.sfxc.entity.LogMessage">
+    select t1.*,tt1.query_name,'检察院' query_unit,decode(
+    t1.dealstaus,'0','待审核','1','待处理','-1','审核未通过','2','待核对','3','成功'，'4','失败')
+    status from Pro_Deal_Info t1, pro_query_info tt1 where t1.bdhm=tt1.query_id
+     <if test="param.status!=null and param.status!='' ">
+    and t1.dealstaus=#{param.status}
+ </if>
+ <if test="param.bdhm!=null and param.bdhm!='' ">
+    and tt1.query_id=#{param.bdhm}
+ </if>
+ <if test="param.queryUnit==1 and param.queryUnit!=null and param.queryUnit !=''">
+    and 1=2
+ </if>
+ <if test="param.queryName!=null and param.queryName!='' ">
+    and t1.query_name=#{param.queryName}
+ </if>
+ <if test="param.backer!=null and param.backer!='' ">
+    and t1.backer=#{param.backer}
+ </if>
+ <if test="param.status!=null and param.status!='' ">
+    and t1.dealstaus=#{param.status}
+ </if> 
+   <!--  union all select t2.*,tt2.query_name,'法院' query_unit，decode
+    (t2.dealstaus,'0','待审核','1','待处理','-1','审核未通过','2','待核对','3','成功'，'4','失败')status 
+    from court_deal_info t2, court_query_info tt2 where t2.bdhm=tt2.query_id
+ <if test="param.status!=null and param.status!='' ">
+    and t2.dealstaus=#{param.status}
+ </if>
+ <if test="param.bdhm!=null and param.bdhm!='' ">
+    and tt2.query_id=#{param.bdhm}
+ </if>
+ <if test="param.queryUnit==0 and param.queryUnit!=null and param.queryUnit !='' ">
+    and 1=2
+ </if>
+ <if test="param.queryName!=null and param.queryName!='' ">
+    and t2.query_name=#{param.queryName}
+ </if>
+ <if test="param.backer!=null and param.backer!='' ">
+    and t2.backer=#{param.backer}
+ </if> -->
+  </select>	
+  <select id="find" resultMap="base"  parameterType="com.sfxc.entity.LogMessage">
+  <if test="queryUnit=='检察院'">
+    select t1.*,tt1.query_name,'检察院' query_unit,decode(
+    t1.dealstaus,'0','待审核','1','待处理','-1','审核未通过','2','待核对','3','成功'，'4','失败')
+    status,ttt1.msg from Pro_Deal_Info t1 
+    inner join pro_query_info tt1  on t1.bdhm=tt1.query_id and t1.bdhm=#{bdhm}
+ left join PRO_QUERY_RESULT ttt1 on t1.bdhm=ttt1.query_id  
+  </if>
+ <if test="queryUnit=='法院'">
+    select t1.*,tt1.query_name,'法院' query_unit,decode(
+    t1.dealstaus,'0','待审核','1','待处理','-1','审核未通过','2','待核对','3','成功'，'4','失败')
+    status,ttt1.msg from court_Deal_Info t1 
+    inner join court_query_info tt1  on t1.bdhm=tt1.query_id and t1.bdhm=#{bdhm}
+    left join COURT_QUERY_RESULT ttt1 on t1.bdhm=ttt1.query_id  
+  </if>
+
+  </select>	
+</mapper>

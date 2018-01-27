@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.CourtResultDjxxDao">
+ <resultMap id="base" type="com.sfxc.entity.CourtResultDjxx"></resultMap>
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.CourtResultDjxx">
+    insert into COURT_RESULT_DJXX (ID, BDHM, CCXH, 
+      CSXH,SFBDJ,DJJZRQ,DJJG,DJwH,DJJE, PROVIDER, 
+      PROVIDETIME)
+    values (s_key.nextval, #{bdhm}, #{ccxh}, 
+      #{csxh}, #{sfbdj}, #{djjzrq}, #{djjg}, 
+      #{djwh}, #{djje}, #{provider}, 
+      #{providetime})
+  </select>
+  <select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.CourtResultDjxx">
+		SELECT t.* FROM COURT_RESULT_DJXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="id!=null and id!='' ">
+		and id=#{id}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.CourtResultDjxx">
+		update  COURT_RESULT_DJXX 
+		set CCXH=#{ccxh},CSXH=#{csxh},SFBDJ=#{sfbdj},DJJZRQ=#{djjzrq},DJJG=#{djjg},
+		DJwH=#{djwh},DJJE=#{djje},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where id=#{id}
+ </select>
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.CourtResultDjxx">
+		delete  COURT_RESULT_DJXX 
+		where id=#{id}
+ </select>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProCheckWsinfoDao">
+	<resultMap id="base" type="com.sfxc.entity.ProCheckWsinfo"></resultMap>
+	<select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProCheckWsinfo">
+		INSERT INTO
+		PRO_CHECK_WSINFO(
+	      KEYID,    
+		  XH, 
+		  WJMC,
+		  WJLX,
+		  FILEPATH,
+		  QUERY_ID		    				
+		)
+		values(
+		s_key.nextval,
+		#{xh},
+		#{wjmc},
+		#{wjlx},
+		#{filepath},
+		#{queryId}
+		)		
+	</select>
+	<select id="findByPage" resultMap="base" parameterType="com.sfxc.entity.ProCheckWsinfo">
+		SELECT t.* FROM  PRO_CHECK_WSINFO t WHERE 1=1 and t.QUERY_ID=#{param.queryId}
+	</select>	
+</mapper>

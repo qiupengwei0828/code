@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sfxc.dao.ProWsinfoDao" >
+  <resultMap id="base" type="com.sfxc.entity.ProWsinfo" >
+  </resultMap>
+
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProWsinfo" >
+    insert into PRO_WSINFO (KEYID, QUERY_ID, RESULTMSG, 
+      MSG)
+    values (s_key.nextval,, #{queryId}, #{resultmsg}, 
+      #{msg})
+  </select>
+  <select id="find" resultMap="base" parameterType="com.sfxc.entity.ProWsinfo" >
+    select t.* from PRO_WSINFO where QUERY_ID=#{queryId}
+  </select>
+</mapper>

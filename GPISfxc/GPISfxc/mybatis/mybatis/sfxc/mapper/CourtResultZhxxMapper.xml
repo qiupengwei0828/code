@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.CourtResultZhxxDao">
+  <resultMap id="base" type="com.sfxc.entity.CourtResultZhxx">
+  </resultMap>
+ 
+  <select id="insert" resultMap="base"  parameterType="com.sfxc.entity.CourtResultZhxx">
+    insert into COURT_RESULT_ZHXX (ID, BDHM, CCXH, 
+      KHZH, YE, FKSJ, CCLB, 
+      ZHZT, KHWD, BZ, TXDZ, 
+      YZBM, LXDH, BEIZ, SFTZ, PROVIDER, 
+      PROVIDETIME)
+    values (s_key.nextval, #{bdhm}, #{ccxh}, 
+      #{khzh}, #{ye}, #{fksj}, #{cclb}, 
+      #{zhzt}, #{khwd}, #{bz}, #{txdz}, 
+      #{yzbm}, #{lxdh}, #{beiz}, #{sftz}, 
+      #{provider},  #{providetime})
+  </select>
+  <select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.CourtResultZhxx">
+		SELECT t.* FROM COURT_RESULT_ZHXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="id!=null and id!='' ">
+		and id=#{id}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.CourtResultZhxx">
+		update  COURT_RESULT_ZHXX 
+		set CCXH=#{ccxh},KHZH=#{khzh},YE=#{ye},FKSJ=#{fksj},CCLB=#{cclb},ZHZT=#{zhzt},
+		KHWD=#{khwd},BZ=#{bz},TXDZ=#{txdz},YZBM=#{yzbm},LXDH=#{lxdh},
+		BEIZ=#{beiz},SFTZ=#{sftz},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where id=#{id}
+ </select>
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.CourtResultZhxx">
+		delete  COURT_RESULT_ZHXX 
+		where id=#{id}
+ </select>	
+</mapper>

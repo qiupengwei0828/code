@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProResultJyxxDao">
+  <resultMap id="base" type="com.sfxc.entity.ProResultJyxx">
+  </resultMap>
+ 
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProResultJyxx">
+    insert into PRO_RESULT_JYXX (KEYID, BDHM, KHZH, 
+      JYLSH, JYLX, JYFS, 
+      JYWD, JJBH, JYSJ, DFJE, 
+      JFJE, BZ, SFFMC, SFFZH, 
+      SFFLX, SFFDW, YE, ZYXX, 
+      FKSJ, PROVIDER, PROVIDETIME
+      )
+    values (s_key.nextval, #{bdhm}, #{khzh}, 
+      #{jylsh}, #{jylx}, #{jyfs}, 
+      #{jywd}, #{jjbh}, #{jysj}, #{dfje}, 
+      #{jfje}, #{bz}, #{sffmc}, #{sffzh}, 
+      #{sfflx}, #{sffdw}, #{ye}, #{zyxx}, 
+      #{fksj}, #{provider}, #{providetime}
+      )
+  </select>
+<select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.ProResultJyxx">
+		SELECT t.* FROM PRO_RESULT_JYXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="keyid!=null and keyid!='' ">
+		and keyid=#{keyid}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.ProResultJyxx">
+		update  PRO_RESULT_JYXX 
+		set KHZH=#{khzh},JYLSH=#{jylsh},JYLX=#{jylx},JYFS=#{jyfs},JYWD=#{jywd},JJBH=#{jjbh},
+		JYSJ=#{jysj},DFJE=#{dfje},JFJE=#{jfje},BZ=#{bz},SFFMC=#{sffmc},SFFZH=#{sffzh},
+		SFFLX=#{sfflx},SFFDW=#{sffdw},YE=#{ye},ZYXX=#{zyxx}
+		,FKSJ=#{fksj},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where keyid=#{keyid}
+ </select>
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.ProResultJyxx">
+		delete  PRO_RESULT_JYXX 
+		where keyid=#{keyid}
+ </select>	
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:task="http://www.springframework.org/schema/task"  
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"    
+   xsi:schemaLocation="http://www.springframework.org/schema/beans    
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    <!-- 要调用的工作类 -->
+	<bean id="ClientSyyJob" class="com.court.client.ClientSyy" />
+
+   <!-- 定义调用对象和调用对象的方法 -  获取协查请求报文-->
+	<bean id="jobGetQueryInfo" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+	    <!-- 调用的类 -->
+	    <property name="targetObject">
+           <ref bean="ClientSyyJob"/>
+	    </property>
+	    <!-- 调用类中的方法 -->
+	    <property name="targetMethod">
+	        <value>getQueryInfo</value>
+	    </property>
+	</bean>
+	
+	<!-- 获取协查请求文书-->
+	<bean id="jobGetWsInfo" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+	    <property name="targetObject">
+           <ref bean="ClientSyyJob"/>
+	    </property>
+	    <property name="targetMethod">
+	        <value>getWsInfo</value>
+	    </property>
+	</bean>
+    <!-- 反馈报文 -->
+	<bean id="jobFeedInfo" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+	    <property name="targetObject">
+           <ref bean="ClientSyyJob"/>
+	    </property>
+	    <property name="targetMethod">
+	        <value>feedQueryInfo</value>
+	    </property>
+	</bean>
+
+	<!-- 定义触发时间，获取协查请求-->  
+	<bean id="doQueryInfoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail">
+	        <ref bean="jobGetQueryInfo"/>
+	    </property>
+	    <!-- cron表达式  每隔10分钟执行一次-->
+	    <property name="cronExpression">
+	         <value>* */10 * * * ?</value> 
+	    </property>
+	</bean>
+	
+		<!-- 定义触发时间，获取协查文书 -->  
+	<bean id="doWsInfoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail">
+	        <ref bean="jobGetWsInfo"/>
+	    </property>
+	    <!-- cron表达式  每隔10分钟执行一次-->
+	    <property name="cronExpression">
+	         <value>* */20 * * * ?</value> 
+	    </property>
+	</bean>
+	
+			<!-- 定义触发时间，反馈报文 -->  
+	<bean id="doFeedTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail">
+	        <ref bean="jobFeedInfo"/>
+	    </property>
+	    <!-- cron表达式  每隔10分钟执行一次-->
+	    <property name="cronExpression">
+	         <value>* */50 * * * ?</value> 
+	    </property>
+	</bean>
+	<!-- 调度  总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序  -->
+	<bean id="startQuertz" lazy-init="false" autowire="no"
+	 class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	    <property name="triggers">
+	        <list>
+	              <ref bean="doQueryInfoTime"/>
+	              <ref bean="doWsInfoTime"/>
+	              <ref bean="doFeedTime"/>
+	        </list>
+	    </property>
+	</bean>
+</beans>

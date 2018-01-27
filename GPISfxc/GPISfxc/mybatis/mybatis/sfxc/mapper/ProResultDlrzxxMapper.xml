@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProResultDlrzxxDao">
+  <resultMap id="base" type="com.sfxc.entity.ProResultDlrzxx"></resultMap>
+
+  <select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProResultDlrzxx">
+    insert into PRO_RESULT_DLRZXX (KEYID, BDHM, RZXH, 
+      DLSJ, KHZH, DLDZ, DLCZ, 
+      DLMS, FKSJ, PROVIDER, 
+      PROVIDETIME)
+    values (s_key.nextval, #{bdhm}, #{rzxh}, 
+      #{dlsj}, #{khzh}, #{dldz}, #{dlcz}, 
+      #{dlms}, #{fksj}, #{provider}, 
+      #{providetime})
+  </select>
+ <select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.ProResultDlrzxx">
+		SELECT t.* FROM PRO_RESULT_DLRZXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="keyid!=null and keyid!='' ">
+		and keyid=#{keyid}
+		</if>
+	</select>
+	<select id="update" resultMap="base" parameterType="com.sfxc.entity.ProResultDlrzxx">
+		update  PRO_RESULT_DLRZXX 
+		set RZXH=#{rzxh},DLSJ=#{dlsj},KHZH=#{khzh},DLDZ=#{dldz},DLCZ=#{dlcz},DLMS=#{dlms},
+		FKSJ=#{fksj},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where keyid=#{keyid}
+ </select>
+   <select id="delete" resultMap="base" parameterType="com.sfxc.entity.ProResultDlrzxx">
+		delete  PRO_RESULT_DLRZXX 
+		where keyid=#{keyid}
+ </select>
+</mapper>

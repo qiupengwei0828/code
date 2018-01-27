@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProResultZhxxDao">
+  <resultMap id="base" type="com.sfxc.entity.ProResultZhxx">
+  </resultMap>
+ 
+  <select id="insert" resultMap="base"  parameterType="com.sfxc.entity.ProResultZhxx">
+    insert into PRO_RESULT_ZHXX (KEYID, BDHM, ZHXH, 
+      KHZH, YE, FKSJ, ZHLB, 
+      ZHZT, KHWD, BZ, TXDZ, 
+      YZBM, LXDH, BEIZ, SFTZ, 
+      KHRQ, XHRQ, PROVIDER, 
+      PROVIDETIME)
+    values (s_key.nextval, #{bdhm}, #{zhxh}, 
+      #{khzh}, #{ye}, #{fksj}, #{zhlb}, 
+      #{zhzt}, #{khwd}, #{bz}, #{txdz}, 
+      #{yzbm}, #{lxdh}, #{beiz}, #{sftz}, 
+      #{khrq}, #{xhrq}, #{provider}, 
+      #{providetime})
+  </select>
+  <select id="findAllList" resultMap="base" parameterType="com.sfxc.entity.ProResultZhxx">
+		SELECT t.* FROM PRO_RESULT_ZHXX t where 1=1
+		and BDHM=#{bdhm}
+		<if test="keyid!=null and keyid!='' ">
+		and keyid=#{keyid}
+		</if>
+ </select>	
+ <select id="update" resultMap="base" parameterType="com.sfxc.entity.ProResultZhxx">
+		update  PRO_RESULT_ZHXX 
+		set ZHXH=#{zhxh},KHZH=#{khzh},YE=#{ye},FKSJ=#{fksj},ZHLB=#{zhlb},ZHZT=#{zhzt},
+		KHWD=#{khwd},BZ=#{bz},TXDZ=#{txdz},YZBM=#{yzbm},LXDH=#{lxdh},BEIZ=#{beiz},
+		SFTZ=#{sftz},KHRQ=#{khrq},XHRQ=#{xhrq},PROVIDER=#{provider},PROVIDETIME=#{providetime}
+		where keyid=#{keyid}
+ </select>
+ <select id="delete" resultMap="base" parameterType="com.sfxc.entity.ProResultZhxx">
+		delete  PRO_RESULT_ZHXX 
+		where keyid=#{keyid}
+ </select>		
+</mapper>

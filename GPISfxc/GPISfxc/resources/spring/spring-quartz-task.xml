@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd" default-lazy-init="true">
+       
+	<description>Quartz的定时任务配置</description>
+
+	<!-- Quartz集成工厂 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		lazy-init="false">
+		<!-- Triggers集成 -->
+		<property name="triggers">
+			<list>											
+				<ref bean="readProTXT"/>
+				 <ref bean="readCourtTXT"/> 
+				 <ref bean="feedbackProMessage"/>
+				 <ref bean="feedbackCourtMessage"/>
+			</list>
+		</property>
+	</bean>
+	<!-- 读取检察院TXT文件（每隔1分钟读取一次） -->
+	<bean id="readProTXT" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="readProMessage" />
+		<property name="cronExpression" value="0 0/3 * * * ?"  />		
+	</bean>
+	<bean id="readProMessage"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="readMessageProTXT" />
+		<property name="targetMethod" value="readTxt" />
+	</bean>
+	<bean id="readMessageProTXT" class="com.sfxc.task.ReadProTxt" />
+	
+	
+	<!-- 读取法院TXT文件（每隔1分钟读取一次） -->
+	<bean id="readCourtTXT" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="readCourtMessage" />
+		<property name="cronExpression" value="0 0/2 * * * ?"  />		
+	</bean>
+	<bean id="readCourtMessage"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="readMessageCourtTXT" />
+		<property name="targetMethod" value="readTxt" />
+	</bean>
+	<bean id="readMessageCourtTXT" class="com.sfxc.task.ReadCourtTxt" />
+	
+	
+	<!-- 读取检察院返回文件（每隔1分钟读取一次） -->
+	<bean id="feedbackProMessage" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="readFeedbackProMessage" />
+		<property name="cronExpression" value="0 0/2 * * * ?"  />		
+	</bean>
+	<bean id="readFeedbackProMessage"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="readFeedbackProMessageTXT" />
+		<property name="targetMethod" value="readTxt" />
+	</bean>
+	<bean id="readFeedbackProMessageTXT" class="com.sfxc.task.ProFeedback" />
+	
+	
+	<!-- 读取法院返回文件（每隔1分钟读取一次） -->
+	<bean id="feedbackCourtMessage" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="readfeedbackCourtMessage" />
+		<property name="cronExpression" value="0 0/2 * * * ?"  />		
+	</bean>
+	<bean id="readfeedbackCourtMessage"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="readfeedbackCourtMessageTXT" />
+		<property name="targetMethod" value="readTxt" />
+	</bean>
+	<bean id="readfeedbackCourtMessageTXT" class="com.sfxc.task.CourtFeedback" />
+	
+	
+</beans>

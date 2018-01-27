@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sfxc.dao.ProQueryInfoDao">
+	<resultMap id="base" type="com.sfxc.entity.ProQueryInfo"></resultMap>
+	<select id="findByPage" resultMap="base" parameterType="com.sfxc.entity.ProQueryInfo">
+		 SELECT t.query_id,
+        decode(t.bank_type,'null','',t.bank_type)bank_type,
+        decode(t.query_qu,'null','',t.query_qu)query_qu,
+        decode(t.query_name,'null','',t.query_name)query_name,
+        decode(t.nation_area,'null','',t.nation_area)nation_area,
+        decode(t.cert_type,'null','',t.cert_type)cert_type,
+        decode(t.cert_no,'null','',t.cert_no)cert_no,
+        decode(t.org_no,'null','',t.org_no)org_no,
+        decode(t.ssuctf_ahr_lo,'null','',t.ssuctf_ahr_lo)ssuctf_ahr_lo,
+        decode(t.apply_name,'null','',t.apply_name)apply_name,
+        decode(t.procurator_name,'null','',t.procurator_name)procurator_name,
+        decode(t.case_id,'null','',t.case_id)case_id,
+        decode(t.start_dt,'null','',t.start_dt)start_dt,
+        decode(t.end_dt,'null','',t.end_dt)end_dt,
+        decode(t.late_back_dt,'null','',t.late_back_dt)late_back_dt,
+        decode(t.request_dt,'null','',t.request_dt)request_dt FROM PRO_QUERY_INFO t,PRO_DEAL_INFO tt WHERE 1=1 
+		and t.query_id=tt.bdhm  
+		<if test="param.status==3">
+		and (tt.dealstaus='1' or tt.dealstaus='-1')
+		</if>
+		<if test="param.status!=3">
+		and tt.dealstaus=#{param.status}
+		</if>
+		<if test="param.requestDt!=null and param.requestDt!= '' ">
+		AND REQUEST_DT &gt;= #{param.requestDt1} AND REQUEST_DT &lt;= #{param.requestDt}
+		</if>
+		<if test="param.procuratorName!=null and param.procuratorName!=''">
+		AND PROCURATOR_NAME=#{param.procuratorName}
+		</if>
+		<if test="param.queryName!=null and param.queryName!=''">
+		and QUERY_NAME=#{param.queryName}
+		</if>
+	</select>
+	<select id="insert" resultMap="base" parameterType="com.sfxc.entity.ProQueryInfo">
+		INSERT INTO
+		PRO_QUERY_INFO(
+	      QUERY_ID,    
+		  BANK_TYPE, 
+		  QUERY_QU,      
+		  QUERY_NAME,
+		  NATION_AREA,   
+		  CERT_TYPE,   
+		  CERT_NO,     
+		  ORG_NO,  
+		  SSUCTF_AHR_LO,
+		  APPLY_NAME,
+		  PROCURATOR_NAME,
+		  CASE_ID,
+		  START_DT,
+		  END_DT,
+		  LATE_BACK_DT,
+		  REQUEST_DT    				
+		)
+		values(
+		#{queryId},
+		#{bankType},
+		#{queryQu},
+		#{queryName},
+		#{nationArea},
+		#{certType},
+		#{certNo},
+		#{orgNo},
+		#{ssuctfAhrLo},
+		#{applyName},
+		#{procuratorName},
+		#{caseId},	
+		#{startDt},
+		#{endDt},
+		#{lateBackDt},	
+		#{requestDt}
+		)		
+	</select>
+	<select id="find" resultMap="base" parameterType="com.sfxc.entity.ProQueryInfo">
+		SELECT t.query_id,
+        decode(t.bank_type,'null','',t.bank_type)bank_type,
+        decode(t.query_qu,'null','',t.query_qu)query_qu,
+        decode(t.query_name,'null','',t.query_name)query_name,
+        decode(t.nation_area,'null','',t.nation_area)nation_area,
+        decode(t.cert_type,'null','',t.cert_type)cert_type,
+        decode(t.cert_no,'null','',t.cert_no)cert_no,
+        decode(t.org_no,'null','',t.org_no)org_no,
+        decode(t.ssuctf_ahr_lo,'null','',t.ssuctf_ahr_lo)ssuctf_ahr_lo,
+        decode(t.apply_name,'null','',t.apply_name)apply_name,
+        decode(t.procurator_name,'null','',t.procurator_name)procurator_name,
+        decode(t.case_id,'null','',t.case_id)case_id,
+        decode(t.start_dt,'null','',t.start_dt)start_dt,
+        decode(t.end_dt,'null','',t.end_dt)end_dt,
+        decode(t.late_back_dt,'null','',t.late_back_dt)late_back_dt,
+        decode(t.request_dt,'null','',t.request_dt)request_dt,tt.remark FROM PRO_QUERY_INFO t,PRO_DEAL_INFO tt WHERE 1=1 
+		and t.query_id=tt.bdhm
+		and t.QUERY_ID=#{queryId}
+	</select>	
+</mapper>
