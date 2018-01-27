@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.MenuDao">
+	<!-- com.sys.entity.Menu -->
+	<resultMap id="base" type="Menu"></resultMap>
+
+
+	<!-- 菜单树 -->
+	<select id="findMenuTree" resultMap="base" parameterType="java.util.Map">
+		select
+		t.menu_id menuId,
+		t.app_code,
+		t.menu_name,
+		t.act_url,
+		t.p_menu_id,
+		t.disp_no,
+		t.tip,
+		t.icon
+		from (select distinct t.menu_id,t.app_code,
+		t.menu_name,
+		t.act_url,
+		t.p_menu_id,
+		t.disp_no,
+		t.tip,
+		t.icon from
+		T_SYS_APP_MENU t,t_sys_role_menu r ,T_SYS_USER_ROLE s where
+		s.user_id =
+		#{userId}
+		and t.app_code = #{appCode} and r.role_code=s.role_code and
+		t.menu_id =
+		r.menu_id)t
+		union select t.menu_id menuId,
+		t.app_code,
+		t.menu_name,
+		t.act_url,
+		t.p_menu_id,
+		t.disp_no,
+		t.tip,
+		t.icon from
+		T_SYS_APP_MENU t,t_sys_role_menu r where t.app_code = #{appCode}
+		and
+		r.role_code= #{common} and t.menu_id = r.menu_id
+		start with t.p_menu_id
+		=1
+		connect by prior t.menu_id = t.p_menu_id
+		order by disp_no
+	</select>
+
+	<select id="find" resultMap="base" parameterType="Menu">
+		SELECT t.*, a.app_name
+		FROM T_SYS_APP_MENU t
+		left join t_sys_app_info a
+		on t.app_code = a.app_code
+		WHERE 1 = 1
+		<if test="menuId != null and menuId >1 ">
+			AND t.menu_id = #{menuId}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Menu">
+		SELECT t.*, a.app_name
+		FROM T_SYS_APP_MENU t
+		left join t_sys_app_info a
+		on t.app_code = a.app_code
+		WHERE 1=1
+		<if test="appCode != null and appCode!='' ">
+			AND t.app_code = #{appCode}
+		</if>
+		order by disp_no
+	</select>
+
+	<!-- 查询角色授权菜单树 -->
+	<select id="grantTreeData" resultMap="base" parameterType="Menu">
+		select t.*, rm.role_code
+		from T_SYS_APP_MENU t
+		left join (select
+		distinct r.menu_id,r.role_code from t_sys_role_menu r
+		where r.role_code
+		= #{roleCode}) rm
+		on t.menu_id = rm.menu_id(+)
+		where t.app_code =
+		#{appCode}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="Menu">
+		<![CDATA[
+		INSERT INTO
+			T_SYS_APP_MENU (
+				MENU_ID,	
+				APP_CODE,			
+				MENU_NAME,	
+				ACT_URL,		
+				P_MENU_ID,
+				DISP_NO,
+				TIP,
+				ICON
+			)
+			values(
+				s_key.nextval,
+				#{appCode},
+				#{menuName},
+				#{actUrl},
+				#{pMenuId},
+				#{dispNo},
+				#{tip},
+				#{icon}
+			)
+		]]>
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Menu">
+		DELETE FROM
+		T_SYS_APP_MENU
+		where
+		MENU_ID = #{menuId}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="Menu">
+		<![CDATA[
+		update
+			T_SYS_APP_MENU
+		set 
+			APP_CODE = #{appCode},
+			MENU_NAME = #{menuName},
+			ACT_URL = #{actUrl},
+			P_MENU_ID =  #{pMenuId},
+			DISP_NO = #{dispNo},
+			TIP = #{tip},
+			ICON =  #{icon}
+		where
+			MENU_ID = #{menuId}
+		]]>
+	</select>
+
+</mapper>

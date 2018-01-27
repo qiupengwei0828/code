@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.UserRoleDao">
+	<resultMap id="base" type="UserRole"></resultMap>
+
+	<select id="delete" resultMap="base" parameterType="UserRole">
+		delete
+		t_sys_user_role
+		where
+		user_id=#{userId}
+		and
+		role_code=#{roleCode}
+	</select>
+
+	<select id="saveUserRole" resultMap="base" parameterType="UserRole">
+		insert
+		into
+		t_sys_user_role(
+		ID,
+		user_id,
+		role_code
+		)
+		values(
+		S_KEY.NEXTVAL,
+		#{userId},
+		#{roleCode}
+		)
+	</select>
+
+	<select id="find" resultMap="base" parameterType="UserRole">
+		select
+		*
+		from
+		T_SYS_USER_ROLE t
+		where 1 = 1
+		<if test="roleCode != null and roleCode != '' ">
+			and role_code=#{roleCode}
+		</if>
+		<if test="userId != null and userId != '' ">
+			and USER_ID=#{userId}
+		</if>
+
+	</select>
+</mapper>

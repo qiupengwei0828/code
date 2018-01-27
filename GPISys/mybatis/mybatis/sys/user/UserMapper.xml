@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sys.dao.UserDao">
+
+	<resultMap id="base" type="User"></resultMap>
+
+	<select id="findFormatByLoginName" resultMap="base" parameterType="String">
+		SELECT a.* FROM T_SYS_USER_INFO a WHERE 1=1
+		AND a.user_Id=#{userId}
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="User">
+		SELECT
+		t.*
+		FROM
+		T_SYS_USER_INFO t
+		where
+		1 = 1
+		<if test="userId != null and userId != '' ">
+			and USER_ID=#{userId}
+		</if>
+		<if test="userName!= null and userName != '' ">
+			AND user_name like '%'||#{userName}||'%'
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			and ORG_NO=#{orgNo}
+		</if>
+	</select>
+
+	<select id="find" resultMap="base" parameterType="User">
+		SELECT
+		T.*,
+		O.ORG_NAME
+		FROM T_SYS_USER_INFO T
+		LEFT JOIN T_SYS_ORG_INFO O
+		ON T.ORG_NO=O.ORG_NO
+		WHERE 1 = 1
+		<if test="userName!= null and userName != '' ">
+			AND t.user_name like '%'||#{userName}||'%'
+		</if>
+		<if test="tel!= null and tel != '' ">
+			AND t.tel= #{tel}
+		</if>
+		<if test="status!= null and status != '' ">
+			AND t.status=#{status}
+		</if>
+		<if test="userId!= null and userId != '' ">
+			AND user_id=#{userId}
+		</if>
+	</select>
+
+	<select id="existsUserId" resultMap="base" parameterType="User">
+		SELECT
+		t.*
+		FROM
+		T_SYS_USER_INFO t
+		WHERE
+		USER_ID = #{userId}
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="User">
+		INSERT INTO
+		T_SYS_USER_INFO (
+		USER_ID,
+		USER_NAME,
+		PWD,
+		HR_NO,
+		ORG_NO,
+		DEP_CODE,
+		SEX,
+		CERT_TYP,
+		CERT_NO,
+		NATIVE_PLACE,
+		NATION,
+		USER_CLASS,
+		BIRTHDAY,
+		BEGIN_WORK_DATE,
+		POLITICAL_STATUS,
+		ST_LEVEL,
+		POST,
+		RANK,
+		POS_TITLE,
+		POS,
+		POS_DATE,
+		TEL,
+		MOBILE,
+		EMAIL,
+		MOBILE2,
+		STATUS,
+		CRT_USER,
+		CRT_TIME,
+		SALT
+		)
+		values(
+		#{userId},
+		#{userName},
+		#{pwd},
+		#{hrNo},
+		#{orgNo},
+		#{depCode},
+		#{sex},
+		#{certTyp},
+		#{certNo},
+		#{nativePlace},
+		#{nation},
+		#{userClass},
+		#{birthday},
+		#{beginWorkDate},
+		#{politicalStatus},
+		#{stLevel},
+		#{post},
+		#{rank},
+		#{posTitle},
+		#{pos},
+		#{posDate},
+		#{tel},
+		#{mobile},
+		#{email},
+		#{mobile2},
+		#{status},
+		#{crtUser},
+		#{crtTime},
+		#{salt}
+		)
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="User">
+		DELETE FROM
+		T_SYS_USER_INFO
+		WHERE
+		USER_ID = #{userId}
+	</select>
+
+	<select id="update" resultMap="base" parameterType="User">
+		update
+		T_SYS_USER_INFO
+		set
+		USER_NAME=#{userName},
+		HR_NO=#{hrNo},
+		ORG_NO=#{orgNo},
+		DEP_CODE=#{depCode},
+		SEX=#{sex},
+		CERT_TYP=#{certTyp},
+		CERT_NO=#{certNo},
+		NATIVE_PLACE=#{nativePlace},
+		NATION=#{nation},
+		USER_CLASS=#{userClass},
+		BIRTHDAY=#{birthday},
+		BEGIN_WORK_DATE=#{beginWorkDate},
+		POLITICAL_STATUS=#{politicalStatus},
+		ST_LEVEL=#{stLevel},
+		POST=#{post},
+		RANK=#{rank},
+		POS_TITLE=#{posTitle},
+		POS=#{pos},
+		POS_DATE=#{posDate},
+		TEL=#{tel},
+		MOBILE=#{mobile},
+		EMAIL=#{email},
+		MOBILE2=#{mobile2},
+		STATUS=#{status},
+		CRT_USER=#{crtUser},
+		CRT_TIME=#{crtTime}
+		where
+		USER_ID = #{userId}
+	</select>
+
+	<!-- *************************************************** -->
+
+	<select id="findByPage" resultMap="base" parameterType="User">
+		SELECT
+		U.USER_ID,
+		U.USER_NAME,
+		U.PWD,
+		U.HR_NO,
+		U.ORG_NO,
+		O.ORG_NAME,
+		O.ORG_NAME_2ND,
+		U.DEP_CODE,
+		U.SEX,
+		U.CERT_TYP,
+		U.CERT_NO,
+		U.NATIVE_PLACE,
+		U.NATION,
+		U.USER_CLASS,
+		U.BIRTHDAY,
+		U.BEGIN_WORK_DATE,
+		U.POLITICAL_STATUS,
+		U.ST_LEVEL,
+		U.POST,
+		U.RANK,
+		U.POS_TITLE,
+		U.POS,
+		P.POS_NAME,
+		U.POS_DATE,
+		U.TEL,
+		U.MOBILE,
+		U.EMAIL,
+		U.MOBILE2,
+		U.STATUS,
+		U.CRT_USER,
+		U.CRT_TIME,
+		U.SALT
+		FROM T_SYS_USER_INFO U
+		LEFT JOIN
+		T_SYS_ORG_INFO O
+		ON U.ORG_NO =
+		O.ORG_NO
+		LEFT
+		JOIN T_SYS_POSITION_INFO P
+		ON P.POS_CODE = U.POS
+		WHERE 1 =
+		1
+		AND U.ORG_NO IN (
+		SELECT ROG.ORG_NO
+		FROM
+		T_SYS_ORG_INFO ROG
+		CONNECT BY
+		PRIOR ROG.ORG_NO = ROG.P_ORG_NO
+		START WITH
+		ROG.ORG_NO = #{param.orgNo}
+		)
+		<if test="param.userName!= null and param.userName != '' ">
+			AND U.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.userId != null and param.userId != '' ">
+			AND U.user_id = #{param.userId}
+		</if>
+		<if test="param.mobile!= null and param.mobile != '' ">
+			AND U.MOBILE like '%'||#{param.mobile}||'%'
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND U.status=#{param.status}
+		</if>
+		<if test="param.hrNo != null and param.hrNo != '' ">
+			AND U.HR_NO=#{param.hrNo}
+		</if>
+		<if test="param.certNo != null and param.certNo != '' ">
+			AND U.CERT_NO=#{param.certNo}
+		</if>
+
+	</select>
+
+	<select id="findUserRolePage" resultMap="base" parameterType="User">
+		select A.role_code,
+		B.USER_ID,
+		B.USER_NAME,
+		B.SEX,
+		B.ORG_NO,
+		B.DEP_CODE,
+		B.HR_NO,
+		C.ORG_NAME
+		from T_SYS_USER_ROLE A
+		left join
+		T_SYS_USER_INFO B
+		ON
+		A.user_id = B.user_id
+		LEFT JOIN T_SYS_ORG_INFO C
+		ON
+		C.ORG_NO = B.ORG_NO
+		where 1 = 1
+		and
+		role_code=#{param.roleCode}
+	</select>
+
+	<select id="resetPWD" resultMap="base" parameterType="User">
+		update
+		T_SYS_USER_INFO
+		set
+		PWD=#{pwd},SALT=#{salt} where USER_ID =
+		#{userId}
+	</select>
+
+
+	<select id="countUserRole" resultType="int" parameterType="java.util.Map">
+		select count(1) rolecnt
+		from T_SYS_ROLE r, t_sys_user_role t
+		where
+		t.role_code =
+		r.role_code
+		and t.user_id = #{userId}
+		and r.app_code =
+		#{appCode}
+	</select>
+
+	<!-- 查询用户详情 -->
+	<select id="queryUserInfo" resultMap="base" parameterType="User">
+		SELECT U.USER_ID,
+		U.USER_NAME,
+		U.HR_NO,
+		U.ORG_NO,
+		U.POS,
+		O.ORG_NAME,
+		P.POS_NAME
+		FROM
+		T_SYS_USER_INFO U
+		LEFT JOIN T_SYS_ORG_INFO O
+		ON O.ORG_NO =
+		U.ORG_NO
+		LEFT
+		JOIN T_SYS_POSITION_INFO P
+		ON P.POS_CODE = U.POS
+		WHERE
+		1 = 1
+		<if test="userId != null and userId != '' ">
+			and U.USER_ID=#{userId}
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			and U.ORG_NO=#{orgNo}
+		</if>
+	</select>
+
+	<select id="userPage" resultMap="base" parameterType="User">
+		SELECT U.USER_ID,
+		U.USER_NAME,
+		U.PWD,
+		U.HR_NO,
+		U.ORG_NO,
+		O.ORG_NAME,
+		O.ORG_NAME_2ND,
+		U.DEP_CODE,
+		U.SEX,
+		U.CERT_TYP,
+		U.CERT_NO,
+		U.NATIVE_PLACE,
+		U.NATION,
+		U.USER_CLASS,
+		U.BIRTHDAY,
+		U.BEGIN_WORK_DATE,
+		U.POLITICAL_STATUS,
+		U.ST_LEVEL,
+		U.POST,
+		U.RANK,
+		U.POS_TITLE,
+		U.POS,
+		P.POS_NAME,
+		U.POS_DATE,
+		U.TEL,
+		U.MOBILE,
+		U.EMAIL,
+		U.MOBILE2,
+		U.STATUS,
+		U.CRT_USER,
+		U.CRT_TIME,
+		U.SALT
+		FROM T_SYS_USER_INFO U
+		LEFT JOIN
+		T_SYS_ORG_INFO O
+		ON U.ORG_NO = O.ORG_NO
+		LEFT JOIN T_SYS_POSITION_INFO P
+		ON P.POS_CODE = U.POS
+		WHERE 1 = 1
+		<if test="param.orgNo != null and param.orgNo != '' ">
+			AND U.ORG_NO IN (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{param.orgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+		<if test="param.userName!= null and param.userName != '' ">
+			AND U.user_name like '%'||#{param.userName}||'%'
+		</if>
+		<if test="param.userId != null and param.userId != '' ">
+			AND U.user_id = #{param.userId}
+		</if>
+		<if test="param.mobile!= null and param.mobile != '' ">
+			AND U.MOBILE like '%'||#{param.mobile}||'%'
+		</if>
+		<if test="param.status!= null and param.status != '' ">
+			AND U.status=#{param.status}
+		</if>
+		<if test="param.hrNo != null and param.hrNo != '' ">
+			AND U.HR_NO=#{param.hrNo}
+		</if>
+		<if test="param.certNo != null and param.certNo != '' ">
+			AND U.CERT_NO=#{param.certNo}
+		</if>
+	</select>
+
+	<!-- 查询所有密码为空的用户 -->
+	<select id="queryPWDIsNull" resultMap="base" parameterType="User">
+		select * from t_sys_user_info where PWD IS NULL
+	</select>
+
+	<!-- 更新用户机构，岗位信息 -->
+	<select id="update_pos_info" resultMap="base" parameterType="User">
+		UPDATE
+		T_SYS_USER_INFO
+		SET
+		ORG_NO = #{orgNo},
+		POS = #{pos},
+		POS_DATE =
+		#{posDate}
+		WHERE
+		1=1
+		AND USER_ID = #{userId}
+	</select>
+
+</mapper>

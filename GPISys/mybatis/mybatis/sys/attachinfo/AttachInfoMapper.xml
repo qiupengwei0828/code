@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.AttachInfoDao">
+
+	<resultMap id="base" type="AttachInfo"></resultMap>
+
+	<select id="getKey" resultType="Long" parameterType="AttachInfo">
+		SELECT S_KEY.NEXTVAL FROM DUAL
+	</select>
+
+	<select id="find" resultMap="base" parameterType="AttachInfo">
+		SELECT *
+		FROM T_SYS_ATT_INFO A
+		WHERE 1 = 1
+		<if test="tabKey != null and tabKey != '' ">
+			AND A.TAB_KEY = #{tabKey}
+		</if>
+		<if test="cfgCode != null and cfgCode != '' ">
+			AND A.CFG_CODE = #{cfgCode}
+		</if>
+		<if test="appCode != null and appCode != '' ">
+			AND A.APP_CODE = #{appCode}
+		</if>
+		<if test="tab != null and tab != '' ">
+			AND A.TAB = #{tab}
+		</if>
+		<if test="remark != null and remark != '' ">
+			AND A.REMARK = #{remark}
+		</if>
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="AttachInfo">
+		DELETE T_SYS_ATT_INFO A
+		WHERE 1=1
+		<if test="tabKey != null and tabKey != '' ">
+			AND A.TAB_KEY = #{tabKey}
+		</if>
+		<if test="cfgCode != null and cfgCode != '' ">
+			AND A.CFG_CODE = #{cfgCode}
+		</if>
+		<if test="tab != null and tab != '' ">
+			AND A.TAB = #{tab}
+		</if>
+		<if test="appCode != null and appCode != '' ">
+			AND A.APP_CODE = #{appCode}
+		</if>
+		<if test="remark != null and remark != '' ">
+			AND A.REMARK = #{remark}
+		</if>
+	</select>
+
+	<select id="insert" resultMap="base" parameterType="AttachInfo">
+		insert into T_SYS_ATT_INFO t (
+		t.file_id,
+		t.app_code,
+		t.cfg_code,
+		t.tab,
+		t.tab_key,
+		t.file_name,
+		t.file_type,
+		t.file_save_name,
+		t.crt_date,
+		t.file_size,
+		t.remark)
+		values(
+		#{fileId},
+		#{appCode},
+		#{cfgCode},
+		#{tab},
+		#{tabKey},
+		#{fileName},
+		#{fileType},
+		#{fileSaveName},
+		to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss'),
+		#{fileSize},
+		#{remark}
+		)
+	</select>
+
+</mapper>

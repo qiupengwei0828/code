@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.OrgDao">
+
+	<!-- com.sys.entity.Org -->
+	<resultMap id="base" type="Org"></resultMap>
+
+	<select id="find" resultMap="base" parameterType="Org">
+		select t.*, TT.org_Name as pOrgName
+		from T_SYS_ORG_INFO t
+		LEFT JOIN
+		T_SYS_ORG_INFO TT
+		ON t.P_org_no = TT.org_no
+		WHERE 1 = 1
+		<if test="orgNo != null and orgNo !='' ">
+			AND t.ORG_NO = #{orgNo}
+		</if>
+		<if test="pOrgNo != null and pOrgNo != '' ">
+			AND T.P_ORG_NO = #{pOrgNo}
+		</if>
+	</select>
+
+	<select id="get" resultMap="base" parameterType="Org">
+		select t.* from T_SYS_ORG_INFO t WHERE 1=1
+		<if test="orgNo != null and orgNo !='' ">
+			AND t.ORG_NO = #{orgNo}
+		</if>
+	</select>
+
+	<select id="findAllList" resultMap="base" parameterType="Org">
+		SELECT
+		t.* FROM T_SYS_ORG_INFO t
+		WHERE 1=1
+		<if test="orgDimField != null and orgDimField !='' ">
+			<!-- #:加引号；$:不加引号 -->
+			and ${orgDimField}=#{ownDimOrgNo}
+		</if>
+		ORDER BY DISP_NO
+	</select>
+
+	<select id="findAllTree" resultMap="base" parameterType="Org">
+		SELECT
+		O.ORG_NO,
+		O.P_ORG_NO,
+		O.ORG_NAME,
+		O.DISP_NO,
+		DLEVEL.P_NAME AS
+		ORG_LEVEL,
+		DSTATUS.P_NAME AS STATUS,
+		DORGTYPE.P_NAME AS ORG_TYPE,
+		DBDFLAG.P_NAME AS
+		BD_FLAG
+		FROM
+		T_SYS_ORG_INFO O
+		LEFT JOIN T_SYS_DIC_INFO
+		DLEVEL
+		ON DLEVEL.P_VALUE =
+		O.ORG_LEVEL
+		AND DLEVEL.TYPE_CODE =
+		'DIC_ORG_LEVEL'
+		LEFT JOIN
+		T_SYS_DIC_INFO
+		DSTATUS
+		ON DSTATUS.P_VALUE =
+		O.STATUS
+		AND
+		DSTATUS.TYPE_CODE = 'DIC_COMM_STATUS'
+		LEFT JOIN
+		T_SYS_DIC_INFO DORGTYPE
+		ON DORGTYPE.P_VALUE = O.ORG_TYPE
+		AND
+		DORGTYPE.TYPE_CODE = 'DIC_ORG_CLASS'
+		LEFT JOIN T_SYS_DIC_INFO DBDFLAG
+		ON DBDFLAG.P_VALUE = O.BD_FLAG
+		AND DBDFLAG.TYPE_CODE='DIC_BD_FLAG'
+		where 1=1
+		<if test="orgDimField != null and orgDimField != '' ">
+			and O.${orgDimField}=#{ownDimOrgNo}
+		</if>
+		<if test="orgNo != null and orgNo != '' ">
+			AND O.ORG_NO IN (
+			SELECT TT.ORG_NO
+			FROM T_SYS_ORG_INFO TT
+			START WITH TT.ORG_NO = #{orgNo}
+			CONNECT BY PRIOR TT.ORG_NO =
+			TT.P_ORG_NO)
+		</if>
+		ORDER BY O.DISP_NO
+	</select>
+
+	<!-- 添加机构 -->
+	<select id="insert" resultMap="base" parameterType="Org">
+		insert into
+		T_SYS_ORG_INFO(
+		ORG_NO,
+		P_ORG_NO,
+		ORG_NAME,
+		ORG_LEVEL,
+		STATUS,
+		CRT_TIME,
+		CRT_USER,
+		ORG_TYPE,
+		BD_FLAG,
+		DISP_NO
+		)
+		values(
+		#{orgNo},
+		#{pOrgNo},
+		#{orgName},
+		#{orgLevel},
+		#{status},
+		#{crtTime},
+		#{crtUser},
+		#{orgType},
+		#{bdFlag},
+		#{dispNo}
+		)
+	</select>
+
+	<!-- 修改机构 -->
+	<select id="update" resultMap="base" parameterType="Org">
+		update
+		T_SYS_ORG_INFO
+		set
+		P_ORG_NO=#{pOrgNo},
+		ORG_NAME=#{orgName},
+		ORG_LEVEL=#{orgLevel},
+		STATUS=#{status},
+		CRT_TIME=#{crtTime},
+		CRT_USER=#{crtUser},
+		ORG_TYPE=#{orgType},
+		BD_FLAG=#{bdFlag},
+		DISP_NO=#{dispNo}
+		where
+		ORG_NO=#{orgNo}
+	</select>
+
+	<select id="delete" resultMap="base" parameterType="Org">
+		delete
+		T_SYS_ORG_INFO
+		where
+		ORG_NO=#{orgNo}
+	</select>
+
+	<select id="updateDim" resultMap="base" parameterType="Org">
+		update
+		T_SYS_ORG_INFO o
+		set (o.org_no_1st,
+		o.org_name_1st,
+		o.org_no_2nd,
+		o.org_name_2nd,
+		o.org_no_3rd,
+		o.org_name_3rd,
+		o.org_no_4th,
+		o.org_name_4th) =
+		(select min(decode(rownum, 1, tt.org_no)) org_no_1st,
+		min(decode(rownum, 1, tt.org_name))
+		org_name_1st,
+		min(decode(rownum, 2,
+		tt.org_no)) org_no_2st,
+		min(decode(rownum, 2, tt.org_name))
+		org_name_2st,
+		min(decode(rownum, 3, tt.org_no))
+		org_no_3st,
+		min(decode(rownum, 3, tt.org_name)) org_name_3st,
+		min(decode(rownum, 4,
+		tt.org_no)) org_no_4st,
+		min(decode(rownum, 4, tt.org_name))
+		org_name_4st
+		from (select t.*, rownum rowno
+		from T_SYS_ORG_INFO t
+		start
+		with t.org_no = #{orgNo}
+		connect by prior t.p_org_no = t.org_no
+		order by
+		rownum
+		desc) tt)
+		where o.org_no = #{orgNo}
+	</select>
+	<select id="findBDAllList" resultMap="base" parameterType="Org">
+		SELECT
+		t.* FROM T_SYS_ORG_INFO t
+		WHERE 1=1
+		<if test="orgDimField != null and orgDimField !='' ">
+			<!-- #:加引号；$:不加引号 -->
+			and ${orgDimField}=#{ownDimOrgNo}
+		</if>
+		<if test="bdFlag != null and bdFlag != '' ">
+			and t.bd_flag = #{bdFlag}
+		</if>
+		ORDER BY DISP_NO
+	</select>
+</mapper>
